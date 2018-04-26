@@ -1,7 +1,9 @@
 % Howto use the miura_* scripts.
 
-img = im2double(imread('cropped_3.png')); % Read the image
-img = imresize(img,0.5);               % Downscale image
+function [img, overlay_max_curvature, overlay_repeated_line] = miura_usage(img, iterations, r, W)
+
+img = im2double(imread(img)); % Read the image
+img = imresize(img,0.25);               % Downscale image
 
 % Get the valid region, this is a binary mask which indicates the region of 
 % the finger. For quick testing it is possible to use something like:
@@ -20,7 +22,7 @@ md = median(v_max_curvature(v_max_curvature>0));
 v_max_curvature_bin = v_max_curvature > md; 
 
 %% Extract veins using repeated line tracking method
-max_iterations = 20000; r=1; W=29; % Parameters
+max_iterations = iterations; % Parameters
 v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W);
 
 % Binarise the vein image
@@ -46,22 +48,25 @@ overlay_repeated_line(:,:,1) = img;
 overlay_repeated_line(:,:,2) = img + 0.4*v_repeated_line_bin;
 overlay_repeated_line(:,:,3) = img;
 
-figure;
-subplot(3,2,1)
-  imshow(img,[])
-  title('Original captured image')
-subplot(3,2,2)
-  imshow(fvr)
-  title('Detected finger region')
-subplot(3,2,3)
-  imshow(v_max_curvature_bin)
-  title('Binarised veins extracted by maximum curvature method')
-subplot(3,2,4)
-  imshow(overlay_max_curvature)
-  title('Maximum curvature method')  
-subplot(3,2,5)
-  imshow(v_repeated_line_bin)
-  title('Binarised veins extracted by repeated line tracking method')
-subplot(3,2,6)
-  imshow(overlay_repeated_line)
-  title('Repeated line tracking method')
+% figure;
+% subplot(3,2,1)
+%   imshow(img,[])
+%   title('Original captured image')
+% subplot(3,2,2)
+%   imshow(fvr)
+%   title('Detected finger region')
+% subplot(3,2,3)
+%   imshow(v_max_curvature_bin)
+%   title('Binarised veins extracted by maximum curvature method')
+% subplot(3,2,4)
+%   imshow(overlay_max_curvature)
+%   title('Maximum curvature method')  
+% subplot(3,2,5)
+%   imshow(v_repeated_line_bin)
+%   title('Binarised veins extracted by repeated line tracking method')
+% subplot(3,2,6)
+%   imshow(overlay_repeated_line)
+%   title('Repeated line tracking method')
+
+end
+

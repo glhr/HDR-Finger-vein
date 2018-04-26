@@ -1,0 +1,12 @@
+[img, recognize1, recognize2] = miura_usage('cropped_hdr.png',3000, 1, 21);
+figure(1)
+figure;
+subplot(3,2,1)
+  imshow(img,[])
+  title('Original captured image')
+subplot(3,2,4)
+  imshow(maxcurve)
+  title('Maximum curvature method')  
+subplot(3,2,6)
+  imshow(overlay_repeated_line)
+  title('Repeated line tracking method')
