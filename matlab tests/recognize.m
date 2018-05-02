@@ -1,4 +1,4 @@
-[img, maxcurve, repeatedline] = miura_usage('cropped_hdr.png',3000, 1, 21);
+[img, maxcurve, repeatedline] = miura_usage('dehazed_4.png',3000, 1, 21);
 figure(1)
 subplot(3,2,1)
   imshow(img,[])
@@ -10,13 +10,13 @@ subplot(3,2,5)
   imshow(repeatedline)
   title('Repeated line tracking method')
   
-[img2, maxcurve2, repeatedline2] = miura_usage('cropped_3.png',3000, 1, 21);
-subplot(3,2,2)
-  imshow(img2,[])
-  title('Original captured image')
-subplot(3,2,4)
-  imshow(maxcurve2)
-  title('Maximum curvature method')  
-subplot(3,2,6)
-  imshow(repeatedline2)
-  title('Repeated line tracking method')
+% [img2, maxcurve2, repeatedline2] = miura_usage('cropped_3.png',3000, 1, 21);
+% subplot(3,2,2)
+%   imshow(img2,[])
+%   title('Original captured image')
+% subplot(3,2,4)
+%   imshow(maxcurve2)
+%   title('Maximum curvature method')  
+% subplot(3,2,6)
+%   imshow(repeatedline2)
+%   title('Repeated line tracking method')

@@ -3,7 +3,7 @@
 function [img, overlay_max_curvature, overlay_repeated_line] = miura_usage(img, iterations, r, W)
 
 img = im2double(imread(img)); % Read the image
-img = imresize(img,0.25);               % Downscale image
+%img = imresize(img,0.25);               % Downscale image
 
 % Get the valid region, this is a binary mask which indicates the region of 
 % the finger. For quick testing it is possible to use something like:
