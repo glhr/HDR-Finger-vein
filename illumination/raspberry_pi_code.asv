@@ -34,101 +34,95 @@ LED_driver = i2cdev(rpi,buses,address);
 
 %% Led positions 
 led_pos = zeros(8,2);
-led_pos(:,2) = [300 300 300 300 300 300 300 300];
-led_pos(:,1) = [100 310 420 530 640 750 860 970];
+led_pos(:,2) = 
 %led_pos(:,2) = [540, 540, 540, 540, 540, 540, 540, 540]; % y
 %led_pos(:,1) = [140, 380, 620, 860, 1100, 1340, 1580, 1820]; % x
-r = 40; %Measuring radius for grayvalue
+r = 60; %Measuring radius for grayvalue
 
 % the thresholds
-    grey_thr=120;
+    grey_thr=[115,125,130,130,130,130,125,115];
     %grey_thr=[140,140,140,140,140,140,140,140];
     grey_dev=0.2;   
 
 %See if camera is working
-% for i = 1:2
-%     img = snapshot(cam);
-%     img = rgb2gray(img);
-%     img = img(220:820,10:1700);
-%     imagesc(img);
-%     colormap('gray');
-%     drawnow;
-% end
+for i = 1:2
+    img = snapshot(cam);
+    img = rgb2gray(img);
+    img = img(220:820,10:1700);
+    imagesc(img);
+    colormap('gray');
+    drawnow;
+end
  
-figure('pos',[20 20 1600 600]);
+figure;
 %% Adjusting LEDs
   done = false;
-  pwm = [800 1 1 1 1 1 1 1];
-  
-for j = 1:8  
-    setLed(LED_driver, j+7, pwm(j));
-end
+  pwm = [600 400 400 400 400 400 400 400];
+  lowest_pwm = zeros([8 1]);
+  highest_pwm = [1024 1024 1024 1024 1024 1024 1024 1024];
+  pwm_step_size = 10;
+  max_pwm = 1023;
+  iter = 200;
+  maxcount = zeros([8 1]);
+  mincount = zeros([8 1]);
+    while ~done
+        iter = iter-1;
+        frame = rgb2gray(snapshot(cam));
+        frame = frame(220:820,10:1700);
+        imagesc(frame);
+        colormap('gray');
+        drawnow;
+        for j = 1:8  
+        fprintf('Adjusting LED: %d ...', j);
+        p(:,:,j) = frame(led_pos(j,2) - r:led_pos(j,2) + r, led_pos(j,1) - r:led_pos(j,1) + r);
+        mgi(j) = mean2(p(:,:,j));
+        stds(j) = std2(p(:,:,j));
+        
+        fprintf('\nThreshold: %i\t | MGI: %.1f\t\t | STD %.1f\t\t', grey_thr(j), mgi(j), stds(j));
+           
+           if mgi(j) < (grey_thr(j)-10)
+                %Too dark
+                fprintf('--> too dark, increasing PWM');
+                %pwm(j) = pwm(j) + pwm_step_size;
+                
+                pwm(j) = floor(lowest_pwm(j) + (1024 - lowest_pwm(j))/2);
+                lowest_pwm(j) = pwm(j);
+                if pwm(j) >= max_pwm
+                    pwm(j) = max_pwm;
+                    fprintf(' (setting PWM to max)');
+                    maxcount(j) = maxcount(j)+1;
+                end
 
-while(true)
-frame = rgb2gray(snapshot(cam));
-frame = frame(230:830,20:1680);
-imagesc(frame);
-colormap('gray');
-drawnow;
-end
-
-%         
-%   pwm_step_size = 10;
-%   max_pwm = 1023;
-%   iter = 60;
-%   maxcount = 0;
-%   mincount = 0;
-%   pbaspect([0.5 1 1])
-%     while ~done
-%         iter = iter-1;
-%         frame = rgb2gray(snapshot(cam));
-%         frame = frame(230:830,20:1680);
-%         imagesc(frame);
-%         colormap('gray');
-%         drawnow;
-%         
-%         mgi = mean2(frame(:,:));
-%         stds = std2(frame(:,:));
-%         for j = 1:8  
-%         setLed(LED_driver, j+7, pwm(j));
-%         end
-%         
-%         fprintf('\nThreshold: %i\t | MGI: %.1f\t\t | STD %.1f\t\t', grey_thr, mgi, stds);
-%            
-%            if mgi < (grey_thr-5)
-%                 %Too dark
-%                 fprintf('--> too dark, increasing PWM');
-%                 pwm = pwm + 20;
-%                 if pwm >= max_pwm
-%                     fprintf(' (setting PWM to max)');
-%                     maxcount = maxcount+1;
-%                 end
-% 
-%            elseif mgi > (grey_thr+5)
-%                 fprintf('--> too light, decreasing PWM');
-%                 pwm = pwm - 20;
-%                 
-%                 if pwm <= 0
-%                     pwm = 0;
-%                     fprintf(' (setting PWM to min)');
-%                     mincount = mincount + 1;
-%                 end
-% 
-%            else
-%                fprintf('--> illumination is fine');
-%            end
-%            if (maxcount > 1)
-%                done = true;
-%            end
-%            if (mincount > 1)
-%                done = true;
-%            end
-%            
-%         end
-%         if iter == 0
-%             done = true;
-%         end
-
+                setLed(LED_driver, j+7, pwm(j)); 
+                pause(1/200);
+           elseif mgi(j) > (grey_thr(j)+10)
+                fprintf('--> too light, decreasing PWM');
+                %pwm(j) = pwm(j) - pwm_step_size;
+                pwm(j) = floor(highest_pwm(j) - (highest_pwm(j) - lowest_pwm(j))/2);
+                highest_pwm(j) = pwm(j);
+                
+                if pwm(j) <= 0
+                    pwm(j) = 0;
+                    fprintf(' (setting PWM to min)');
+                    mincount(j) = mincount(j) + 1;
+                end
+                setLed(LED_driver, j+7, pwm(j));
+                pause(1/200);
+           else
+               fprintf('--> illumination is fine');
+           end
+           if ((sum(maxcount > 1) > 7))
+               done = true;
+           end
+           if ((sum(mincount > 1) > 7))
+               done = true;
+           end
+           
+        end
+        if iter == 0
+            done = true;
+        end
+    end
 TurnOffLed(LED_driver)
 fprintf(' done calibrating !\n');
 output = read(LED_driver,3);
@@ -182,17 +176,12 @@ imagesc(rgb)
 %%setLed turn the LED on channel on with the value. byte1 are 8 top bits of value and byte2 are the 8 lower bits of value.  
 function setLed(LED_driver, channel, value)
     if (channel > 7 && channel < 16)
-        if (value < 0 && value < 1024)
-            value = 0;
-        elseif (value >= 1024)
-            value = 1023;
-        end
-        byte1 = bitshift(value,-8);
-        byte2 = bitand(value, 255);
-        if(channel == 8)
+        if (value >= 0 && value < 1024)
+            byte1 = bitshift(value,-8);
+            byte2 = bitand(value, 255);
             fprintf('\nChannel: %i\t\t | Value: %i\t\t | Bytes: %i %i ', channel, value, byte1, byte2);
+            write(LED_driver, [channel byte1 byte2]);
         end
-        write(LED_driver, [channel byte1 byte2]);
     end
 end
 %%
