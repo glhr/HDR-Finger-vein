@@ -73,7 +73,7 @@ end
         mgi(j) = mean2(p(:,:,j));
         stds(j) = std2(p(:,:,j));
         
-        fprintf('Threshold: %i\t | MGI: %.2f\t | STD %.2f\t\t', grey_thr(j), mgi(j), stds(j));
+        fprintf('\nThreshold: %i\t | MGI: %.2f\t\t | STD %.2f\t\t', grey_thr(j), mgi(j), stds(j));
            
            if mgi(j) < (grey_thr(j)-10)
                 %Too dark
@@ -103,6 +103,8 @@ end
                 end
                 setLed(LED_driver, j+7, pwm(j));
                 pause(1/200);
+           else
+               fprintf('--> illumination is fine');
            end
            if ((sum(maxcount > 1) > 7))
                done = true;
@@ -172,7 +174,7 @@ function setLed(LED_driver, channel, value)
         if (value >= 0 && value < 1024)
             byte1 = bitshift(value,-8);
             byte2 = bitand(value, 255);
-            fprintf('\nChannel: %i\t\t | Value: %i\t\t | Bytes: %i %i \n', channel, value, byte1, byte2);
+            fprintf('\nChannel: %i\t\t | Value: %i\t\t | Bytes: %i %i ', channel, value, byte1, byte2);
             write(LED_driver, [channel byte1 byte2]);
         end
     end
