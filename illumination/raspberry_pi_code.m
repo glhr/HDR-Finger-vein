@@ -2,6 +2,8 @@ clear all;
 close all;
 clc;
 
+addpath code_fingerROI
+
 %% Connect to Raspberry Pi Board, Address, User, Password
 rpi = raspi('169.254.0.2', 'pi', 'raspberry'); 
 
@@ -35,11 +37,9 @@ led_pos(:,2) = [300 300 300 300 300 300 300 300];
 led_pos(:,1) = [100 310 420 530 640 750 860 970];
 %led_pos(:,2) = [540, 540, 540, 540, 540, 540, 540, 540]; % y
 %led_pos(:,1) = [140, 380, 620, 860, 1100, 1340, 1580, 1820]; % x
-r = 40; %Measuring radius for grayvalue
 
-% the thresholds
+r = 40; %Measuring radius for grayvalue
 grey_thr=120;
-%grey_thr=[140,140,140,140,140,140,140,140];
    
 %See if camera is working
 % for i = 1:2
@@ -53,126 +53,69 @@ grey_thr=120;
  
 figure('pos',[20 20 1600 600]);
 %% Adjusting LEDs
-  done = false;
-  pwm = [800 1 1 1 1 1 1 1];
-  
-for j = 1:8  
+done = false;
+pwm = [800 1 1 1 1 1 1 1];
+
+        
+pwm_step_size = 10;
+max_pwm = 1023;
+iter = 60;
+maxcount = 0;
+mincount = 0;
+
+while ~done
+    iter = iter-1;
+    frame = rgb2gray(snapshot(cam));
+    frame = frame(230:830,20:1680);
+    imagesc(frame);
+    colormap('gray');
+    drawnow;
+
+    mgi = mean2(frame(:,:));
+    stds = std2(frame(:,:));
+    for j = 1:8  
     setLed(LED_driver, j+7, pwm(j));
-end
+    end
 
-while(true)
-frame = rgb2gray(snapshot(cam));
-frame = frame(230:830,20:1680);
-imagesc(frame);
-colormap('gray');
-drawnow;
-end
+    fprintf('\nThreshold: %i\t | MGI: %.1f\t\t | STD %.1f\t\t', grey_thr, mgi, stds);
 
-%         
-%   pwm_step_size = 10;
-%   max_pwm = 1023;
-%   iter = 60;
-%   maxcount = 0;
-%   mincount = 0;
-%   pbaspect([0.5 1 1])
-%     while ~done
-%         iter = iter-1;
-%         frame = rgb2gray(snapshot(cam));
-%         frame = frame(230:830,20:1680);
-%         imagesc(frame);
-%         colormap('gray');
-%         drawnow;
-%         
-%         mgi = mean2(frame(:,:));
-%         stds = std2(frame(:,:));
-%         for j = 1:8  
-%         setLed(LED_driver, j+7, pwm(j));
-%         end
-%         
-%         fprintf('\nThreshold: %i\t | MGI: %.1f\t\t | STD %.1f\t\t', grey_thr, mgi, stds);
-%            
-%            if mgi < (grey_thr-5)
-%                 %Too dark
-%                 fprintf('--> too dark, increasing PWM');
-%                 pwm = pwm + 20;
-%                 if pwm >= max_pwm
-%                     fprintf(' (setting PWM to max)');
-%                     maxcount = maxcount+1;
-%                 end
-% 
-%            elseif mgi > (grey_thr+5)
-%                 fprintf('--> too light, decreasing PWM');
-%                 pwm = pwm - 20;
-%                 
-%                 if pwm <= 0
-%                     pwm = 0;
-%                     fprintf(' (setting PWM to min)');
-%                     mincount = mincount + 1;
-%                 end
-% 
-%            else
-%                fprintf('--> illumination is fine');
-%            end
-%            if (maxcount > 1)
-%                done = true;
-%            end
-%            if (mincount > 1)
-%                done = true;
-%            end
-%            
-%         end
-%         if iter == 0
-%             done = true;
-%         end
+       if mgi < (grey_thr-5)
+            %Too dark
+            fprintf('--> too dark, increasing PWM');
+            pwm = pwm + 20;
+            if pwm >= max_pwm
+                fprintf(' (setting PWM to max)');
+                maxcount = maxcount+1;
+            end
+
+       elseif mgi > (grey_thr+5)
+            fprintf('--> too light, decreasing PWM');
+            pwm = pwm - 20;
+
+            if pwm <= 0
+                pwm = 0;
+                fprintf(' (setting PWM to min)');
+                mincount = mincount + 1;
+            end
+
+       else
+           fprintf('--> illumination is fine');
+       end
+       if (maxcount > 1)
+           done = true;
+       end
+       if (mincount > 1)
+           done = true;
+       end
+
+    end
+    if iter == 0
+        done = true;
+    end
 
 TurnOffLed(LED_driver)
 fprintf(' done calibrating !\n');
-output = read(LED_driver,3);
-dt = datestr(now, 'yymmdd-HHMMSS');
-%imwrite(frame, strcat('demo_', dt, '.png'), 'bitdepth', 8);
 
-img3=im2double(imresize(frame,[340 638]));
-mask_height=4; % Height of the mask
-mask_width=20; % Width of the mask
-[fvr, edges] = lee_region(img3,mask_height,mask_width);
-
-% Create a nice image for showing the edges
-edge_img = zeros(size(img3));
-edge_img(edges(1,:) + size(img3,1)*[0:size(img3,2)-1]) = 1;
-edge_img(edges(2,:) + size(img3,1)*[0:size(img3,2)-1]) = 1;
-
-rgb = zeros([size(img3) 3]);
-rgb(:,:,1) = (img3 - img3.*edge_img) + edge_img;
-rgb(:,:,2) = (img3 - img3.*edge_img);
-rgb(:,:,3) = (img3 - img3.*edge_img);
-
-% Show the original, detected region and edges in one figure
-% subplot(3,3,1)
-%   imagesc(img3)
-%   colormap('gray');
-%   title('Original image')
-% subplot(3,3,2)
-%   imagesc(fvr)
-%   colormap('gray');
-%   title('Finger region')
-% subplot(3,3,3)
-%   imagesc(rgb)
-%   title('Finger edges')
-  
-%% Image for report
-
-[imgn,fvrn,rot,tr] = huang_normalise(img3,fvr,edges);
-fit_line = zeros(size(img3));
-for i=1:size(img3,2)
-    y = -1*tand(rot)*i - tr + size(img3,1)/2;
-    fit_line(round(y),i) = 1;
-end
-
-rgb = zeros([size(img3) 3]);
-rgb(:,:,1) = (img3 - img3.*edge_img) + edge_img;
-rgb(:,:,2) = (img3 - img3.*fit_line) + fit_line;
-rgb(:,:,3) = img3;
-imagesc(rgb)
 
 
 %%setLed turn the LED on channel on with the value. byte1 are 8 top bits of value and byte2 are the 8 lower bits of value.  
