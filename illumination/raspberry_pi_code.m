@@ -1,6 +1,3 @@
-clear rpi;
-clear cam;
-clear LED_driver;
 clear all;
 close all;
 clc;
@@ -41,10 +38,9 @@ led_pos(:,1) = [100 310 420 530 640 750 860 970];
 r = 40; %Measuring radius for grayvalue
 
 % the thresholds
-    grey_thr=120;
-    %grey_thr=[140,140,140,140,140,140,140,140];
-    grey_dev=0.2;   
-
+grey_thr=120;
+%grey_thr=[140,140,140,140,140,140,140,140];
+   
 %See if camera is working
 % for i = 1:2
 %     img = snapshot(cam);
