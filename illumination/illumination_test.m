@@ -10,7 +10,7 @@ rpi = raspi('130.89.237.20', 'pi', 'raspberry');
 % fireworks -> good lighting but no detail
 % spotlight -> way too dark
 
-resolution = '1920x1080'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
+resolution = '800x600'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
 exposure = 'night';
 awb = 'auto';
 metering = 'average';
@@ -44,26 +44,26 @@ LED_driver = i2cdev(rpi,buses,address);
  
 %figure('pos',[20 20 1600 600]); %set aspect ratio and position of figure window
 
-TurnOffLed(LED_driver);
+%TurnOffLed(LED_driver);
 
 % Test effect of varying the intensity of a single LED at a time
-for j = 1:8
-    if(j>1)
-        setLed(LED_driver, j+6, 0);
-    end
-    for pwm = 0:100:1023
-        setLed(LED_driver, j+7, pwm);
-        frame = rgb2gray(snapshot(cam));
-        %imagesc(frame);
-        %colormap('gray');
-        %drawnow;
-        imwrite(frame, strcat('img_illum/black comparison/indiv_', num2str(j), '_',num2str(pwm),'_black.png'),'png', 'bitdepth', 8);
-    end
-end
+% for j = 1:8
+%     if(j>1)
+%         setLed(LED_driver, j+6, 0);
+%     end
+%     for pwm = 0:100:1023
+%         setLed(LED_driver, j+7, pwm);
+%         frame = rgb2gray(snapshot(cam));
+%         %imagesc(frame);
+%         %colormap('gray');
+%         %drawnow;
+%         imwrite(frame, strcat('img_illum/black comparison/thumb_indiv_', num2str(j), '_',num2str(pwm),'_black.png'),'png', 'bitdepth', 8);
+%     end
+% end
 
 TurnOffLed(LED_driver);
 
-cam.MeteringMode = 'spot';
+cam.MeteringMode = 'average';
 
 %% Test different levels of homogeneous illumination
 for pwm = 0:100:1023
@@ -74,7 +74,7 @@ for pwm = 0:100:1023
         %colormap('gray');
         %drawnow;
     end
-    imwrite(frame, strcat('img_illum/black comparison/global_',num2str(pwm),'_black_lowres.png'), 'png','bitdepth', 8);
+    imwrite(frame, strcat('img_illum/black comparison/thumb_global_',num2str(pwm),'_black_lowres_avg.png'), 'png','bitdepth', 8);
 end
 
 %% Done

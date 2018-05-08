@@ -8,10 +8,12 @@ img_bad = imread('img_evaltests/shitty_dehazed.png');
 figure;
 
 
-radius = 5;
-J1 = fspecial('disk', radius);
-filtered_img_good = imfilter(img_good,J1,'replicate');
-filtered_img_bad = imfilter(img_bad,J1,'replicate');
+radius_good = 5;
+radius_bad = 15;
+J_good = fspecial('disk', radius_good);
+J_bad = fspecial('disk', radius_bad);
+filtered_img_good = imfilter(img_good,J_good,'replicate');
+filtered_img_bad = imfilter(img_bad,J_bad,'replicate');
 
 
 [Gx_good, Gy_good] = imgradient(filtered_img_good,'prewitt');
