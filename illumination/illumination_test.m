@@ -13,7 +13,7 @@ rpi = raspi('130.89.237.20', 'pi', 'raspberry');
 resolution = '1920x1080'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
 exposure = 'night';
 awb = 'auto';
-metering = 'spot';
+metering = 'average';
 exposure_comp = 0;
 effect = 'negative';
 
@@ -57,11 +57,13 @@ for j = 1:8
         %imagesc(frame);
         %colormap('gray');
         %drawnow;
-        imwrite(frame, strcat('img_illum/indiv_', num2str(j), '_',num2str(pwm),'_black_irfilter_1.png'),'png', 'bitdepth', 8);
+        imwrite(frame, strcat('img_illum/black comparison/indiv_', num2str(j), '_',num2str(pwm),'_black.png'),'png', 'bitdepth', 8);
     end
 end
 
 TurnOffLed(LED_driver);
+
+cam.MeteringMode = 'spot';
 
 %% Test different levels of homogeneous illumination
 for pwm = 0:100:1023
@@ -72,7 +74,7 @@ for pwm = 0:100:1023
         %colormap('gray');
         %drawnow;
     end
-    imwrite(frame, strcat('img_illum/global_',num2str(pwm),'_black_irfilter_1.png'), 'png','bitdepth', 8);
+    imwrite(frame, strcat('img_illum/black comparison/global_',num2str(pwm),'_black_lowres.png'), 'png','bitdepth', 8);
 end
 
 %% Done
