@@ -3,23 +3,36 @@ close all;
 clc;
 
 %% Connect to Raspberry Pi Board, Address, User, Password
-rpi = raspi('169.254.0.2', 'pi', 'raspberry'); 
+%rpi = raspi('169.254.0.2', 'pi', 'raspberry'); 
+rpi = raspi('130.89.237.20', 'pi', 'raspberry');
+
+%% exposure settings
+% fireworks -> good lighting but no detail
+% spotlight -> way too dark
+
+resolution = '1920x1080'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
+exposure = 'night';
+awb = 'auto';
+metering = 'spot';
+exposure_comp = 0;
+effect = 'negative';
 
 %% Create cameraobject and set camera options
-cam = cameraboard(rpi, 'Resolution','1920x1080', 'Quality', 100);
+cam = cameraboard(rpi, 'Resolution',resolution, 'Quality', 100);
 cam.Rotation = 180;
 cam.Brightness = 52;
 cam.Contrast = 90;
 cam.Sharpness = 0;
 cam.Saturation = 0;
-cam.ExposureMode= 'night';
+cam.ExposureMode= exposure;
+%'auto' (default) | 'night' | 'nightpreview' | 'backlight' | 'spotlight' | 'sports' | 'snow' | 'beach' | 'verylong' | 'fixedfps' | 'antishake' | 'fireworks'
 cam.ExposureCompensation= 0;
 %cam.ColorEffects = [128 128];
-cam.AWBMode = 'auto';
-cam.MeteringMode = 'average';
+cam.AWBMode = awb;
+%'auto (default) | 'off' | 'sun' | 'cloud' | 'shade' | 'tungsten' | 'fluorescent' | 'incandescent' | 'flash' | 'horizon'
+cam.MeteringMode = metering;
 %cam.ROI = [0.04 0.1 0.81 0.8];
 cam.ROI = [0 0 1 1];
-%Available exposure modes: 'off', 'auto', 'night', 'nightpreview', 'backlight', 'spotlight', 'sports', 'snow', 'beach', 'verylong', 'fixedfps', 'antishake', 'fireworks'
 
 %% Set I2C speed and connect with the LED driver
 disableI2C(rpi)
@@ -29,33 +42,37 @@ busspeed = rpi.I2CBusSpeed;
 address = char(scanI2CBus(rpi, buses));
 LED_driver = i2cdev(rpi,buses,address);
  
-figure('pos',[20 20 1600 600]); %set aspect ratio and position of figure window
+%figure('pos',[20 20 1600 600]); %set aspect ratio and position of figure window
 
-%% Test effect of varying the intensity of a single LED at a time
+TurnOffLed(LED_driver);
+
+% Test effect of varying the intensity of a single LED at a time
 for j = 1:8
     if(j>1)
         setLed(LED_driver, j+6, 0);
     end
-    for pwm = 0:20:1023
+    for pwm = 0:100:1023
         setLed(LED_driver, j+7, pwm);
         frame = rgb2gray(snapshot(cam));
-        imagesc(frame);
-        colormap('gray');
-        drawnow;
-        imwrite(frame, strcat('img_illum/indiv_', j, '_',pwm_,'.png'), 'bitdepth', 8);
+        %imagesc(frame);
+        %colormap('gray');
+        %drawnow;
+        imwrite(frame, strcat('img_illum/indiv_', num2str(j), '_',num2str(pwm),'_black_irfilter_1.png'),'png', 'bitdepth', 8);
     end
 end
 
+TurnOffLed(LED_driver);
+
 %% Test different levels of homogeneous illumination
-for pwm = 0:20:1023
+for pwm = 0:100:1023
     for j = 1:8
         setLed(LED_driver, j+7, pwm);
         frame = rgb2gray(snapshot(cam));
-        imagesc(frame);
-        colormap('gray');
-        drawnow;
-        imwrite(frame, strcat('img_illum/global_',pwm_,'.png'), 'bitdepth', 8);
+        %imagesc(frame);
+        %colormap('gray');
+        %drawnow;
     end
+    imwrite(frame, strcat('img_illum/global_',num2str(pwm),'_black_irfilter_1.png'), 'png','bitdepth', 8);
 end
 
 %% Done
