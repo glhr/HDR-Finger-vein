@@ -1,11 +1,16 @@
 close all;
 clear all;
 
-showsegments('img_evaltests/1.png',4);
+%showsegments('img_evaltests/segment_2.png',4);
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
 
-function showsegments(imgpath,divisions_vertical)
-    img = imread(imgpath);
+for n = 1:5
+    input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
+    showsegments(input,4);
+end
+
+function showsegments(img,divisions_vertical)
+
     %img = img(200:800,150:1500);
     [nrows, ncols, dim] = size(img);
     imgrange = [0 255];
@@ -40,6 +45,18 @@ function showsegments(imgpath,divisions_vertical)
     %figure
     %imshow(reconstructed_img,imgrange);
 end   % end of function
+
+function output = normalizeimg(imgpath)
+    img = imread(imgpath);
+    [height, width, dim] = size(img);
+    if (height == 1080 && width == 1920)
+        fprintf('Input image size: 1080 x 1920\n');
+        output = img(380:680,240:1450);
+        output = imresize(output, [75 NaN]);
+    else
+        output = img;
+    end
+end
 
 function [Gx, Gy] = gradient(img,plot)
 
