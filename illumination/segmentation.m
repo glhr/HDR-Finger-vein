@@ -3,33 +3,62 @@ clear all;
 
 %showsegments('img_evaltests/segment_2.png',4);
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
+global divisions_vertical n_images scorematrix segments reconstructed_img
 
-for n = 1:5
+divisions_vertical = 4;
+n_images = 5;
+scorematrix = zeros([divisions_vertical, n_images]);
+
+segments = [];
+reconstructed_img = [];
+
+for n = 1:n_images
     input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
-    showsegments(input,4);
+    showsegments(input,divisions_vertical,n);
 end
 
-function showsegments(img,divisions_vertical)
+selector = select_segments(scorematrix);
+combineimages(selector);
 
+function selector = select_segments(scorematrix)
+
+    n_segments = size(scorematrix,1);
+    maxindex = zeros([1,4]);
+    for n=1:n_segments
+        [maxscore, maxindex(n)] = max(scorematrix(n,:));
+    end
+    selector = maxindex;
+end
+
+function combineimages(selector)
+   global divisions_vertical reconstructed_img segments
+   for n = 1:divisions_vertical
+        reconstructed_img = horzcat(reconstructed_img, segments(:,:,:,n,selector(n)));
+   end
+   figure;
+   imshow(reconstructed_img,[0 255]);
+end
+
+function showsegments(img,divisions_vertical,imgnum)
+    global segments scorematrix
     %img = img(200:800,150:1500);
     [nrows, ncols, dim] = size(img);
     imgrange = [0 255];
     plot_nrows = 4;
 
-    segments = [];
-    reconstructed_img = [];
     figure
     for n = 1:divisions_vertical
-        segments(:,:,:,n) = img(:,((n-1)*floor(ncols/divisions_vertical))   +1:n*floor(ncols/divisions_vertical),:);
-        subplot(plot_nrows,divisions_vertical,n), imshow(segments(:,:,:,n),imgrange);
-        reconstructed_img = horzcat(reconstructed_img, segments(:,:,:,n));
+        segments(:,:,:,n,imgnum) = img(:,((n-1)*floor(ncols/divisions_vertical))   +1:n*floor(ncols/divisions_vertical),:);
+        subplot(plot_nrows,divisions_vertical,n), imshow(segments(:,:,:,n,imgnum),imgrange);
+        %reconstructed_img = horzcat(reconstructed_img, segments(:,:,:,n,imgnum));
     end
     
 
     for n = 1:divisions_vertical
-        [details_weight(:,:,:,n) score_weight(n) details_thresh(:,:,:,n) score_thresh(n)] = subtractillumination(segments(:,:,:,n),0);
+        [details_weight(:,:,:,n), score_weight(n), details_thresh(:,:,:,n), score_thresh(n)] = subtractillumination(segments(:,:,:,n,imgnum),0);
 
-        [Gx(:,:,:,n) Gy(:,:,:,n)] = gradient(segments(:,:,:,n),0);
+        scorematrix(n,imgnum) = score_thresh(n);
+        [Gx(:,:,:,n), Gy(:,:,:,n)] = gradient(segments(:,:,:,n,imgnum),0);
         
         subplot(plot_nrows,divisions_vertical,n+divisions_vertical)
             imshow(details_weight(:,:,:,n),[0 255]),title(sprintf('Detail level: %i', score_weight(n)));
