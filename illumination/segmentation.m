@@ -3,17 +3,18 @@ clear all;
 
 %showsegments('img_evaltests/segment_2.png',4);
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
-global divisions_vertical n_images scorematrix segments reconstructed_img
+global divisions_vertical n_images scorematrix segments reconstructed_img output_gradient output_merge
 
 divisions_vertical = 4;
-n_images = 5;
+n_images = 1;
 scorematrix = zeros([divisions_vertical, n_images]);
 
 segments = [];
 reconstructed_img = [];
 
 for n = 1:n_images
-    input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
+    %input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
+    input = normalizeimg(strcat('img_evaltests/dehazed.png'));
     showsegments(input,n);
 end
 
@@ -40,7 +41,7 @@ function combineimages(selector)
 end
 
 function showsegments(img,imgnum)
-    global segments scorematrix divisions_vertical
+    global segments scorematrix divisions_vertical output_gradient output_merge
     %img = img(200:800,150:1500);
     
     imgrange = [0 255];
@@ -56,17 +57,19 @@ function showsegments(img,imgnum)
     
 
     for n = 1:divisions_vertical
-        [details_weight(:,:,:,n), score_weight(n), details_thresh(:,:,:,n), score_thresh(n)] = subtractillumination(segments(:,:,:,n,imgnum),0);
+        [details_weight(:,:,:,n), score_weight(n), details_thresh(:,:,:,n), score_thresh(n), detail_merge] = subtractillumination(segments(:,:,:,n,imgnum),0);
 
         scorematrix(n,imgnum) = score_thresh(n);
-        [Gx(:,:,:,n), Gy(:,:,:,n)] = gradient(segments(:,:,:,n,imgnum),0);
+        
         
         subplot(plot_nrows,divisions_vertical,n+divisions_vertical)
-            imshow(details_weight(:,:,:,n),[0 255]),title(sprintf('Detail level: %i', score_weight(n)));
+            imshowpair(details_weight(:,:,:,n),details_thresh(:,:,:,n),'montage'),title(sprintf('Detail level: %i | %i', score_weight(n), score_thresh(n)));
         subplot(plot_nrows,divisions_vertical,n+2*divisions_vertical)
-            imshow(details_thresh(:,:,:,n),[0 255]),title(sprintf('Detail level: %i', score_thresh(n))); 
+            gradients = [output_gradient(:,:,:,1),output_gradient(:,:,:,2);
+                output_gradient(:,:,:,3),output_gradient(:,:,:,4)];
+            imshow(gradients,[0 255]);
         subplot(plot_nrows,divisions_vertical,n+3*divisions_vertical)
-            imshowpair(Gx(:,:,:,n), Gy(:,:,:,n), 'montage');
+            imshow(output_merge),title(sprintf('Detail level: %i', detail_merge));
     end
     
     
@@ -95,12 +98,15 @@ function output = normalizeimg(imgpath)
     end
 end
 
-function [Gx, Gy] = gradient(img,plot)
+function [Gmag, Gdir, Gx, Gy, edges] = gradient(img,plot)
 
     radius = 10;
     J1 = fspecial('average', radius);
     img_filtered = imfilter(img,J1,'replicate');
-    [Gx, Gy] = imgradient(img_filtered,'prewitt');
+    [Gmag, Gdir] = imgradient(img_filtered,'prewit');
+    [Gx, Gy] = imgradientxy(img_filtered,'prewit');
+    
+    edges = edge(img,'roberts');
     %[Gx, Gy] = imgradient(I,'central');
     
     if(plot)
@@ -111,7 +117,11 @@ function [Gx, Gy] = gradient(img,plot)
 
 end
 
-function [output_weight, detail_weight, output_thresh, detail_thresh] = subtractillumination(img,plot)
+function [output_weight, detail_weight, output_thresh, detail_thresh, detail_merge] = subtractillumination(img,plot)
+
+    global output_gradient output_merge
+    [Gmag, Gdir, Gx, Gy, edge] = gradient(img,0);
+    
     imgneg = uint8(255*mat2gray(imcomplement(img)));
     filter = fspecial('average', 20);
     background_illum = imfilter(imgneg,filter,'replicate');
@@ -131,6 +141,24 @@ function [output_weight, detail_weight, output_thresh, detail_thresh] = subtract
     
     output_thresh = imadjust(uint8(output_filtered>80));
     detail_thresh = sum(output_thresh(:));
+   
+    %Gx = uint8(Gx);
+    %output_gradient(:,:,:,2) = immultiply(Gx,imcomplement(output_weight));
+    
+    output_reduced = imadjust(output_filtered,[0 1], [0.2 1]);
+    Gy = uint8(255*mat2gray(Gy));
+    Gx = uint8(255*mat2gray(Gx));
+    Gmag = uint8(255*mat2gray(Gmag));
+    Gdir = uint8(255*mat2gray(Gdir));
+    output_gradient(:,:,:,2) = Gy;
+    output_gradient(:,:,:,1) = Gx;
+    output_gradient(:,:,:,3) = Gmag;
+    output_gradient(:,:,:,4) = Gdir;
+    output_merge = immultiply(uint16(imcomplement(imadjust(Gmag))), uint16(output_reduced));
+    output_merge = uint8(255*mat2gray(output_merge));
+    output_merge = immultiply(uint16(output_merge), uint16(Gx));
+
+    detail_merge = sum(output_merge(:));
 
     if(plot == 2) % plot everything
         figure;
