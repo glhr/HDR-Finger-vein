@@ -101,7 +101,7 @@ end
 function [Gmag, Gdir, Gx, Gy, edges] = gradient(img,plot)
 
     radius = 10;
-    J1 = fspecial('average', radius);
+    J1 = fspecial('average', [3 10]);
     img_filtered = imfilter(img,J1,'replicate');
     [Gmag, Gdir] = imgradient(img_filtered,'prewit');
     [Gx, Gy] = imgradientxy(img_filtered,'prewit');
@@ -133,7 +133,7 @@ function [output_weight, detail_weight, output_thresh, detail_thresh, detail_mer
     output_eq(img < 30) = 0;
     output_eq(img > 230) = 0;
     
-    filter2 = fspecial('average', 5);
+    filter2 = fspecial('average', [3 10]);
     output_filtered = imfilter(output_eq,filter2,'replicate');
     
     output_weight = output_eq;
