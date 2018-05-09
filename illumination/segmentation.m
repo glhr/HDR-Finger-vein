@@ -14,7 +14,7 @@ reconstructed_img = [];
 
 for n = 1:n_images
     input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
-    showsegments(input,divisions_vertical,n);
+    showsegments(input,n);
 end
 
 selector = select_segments(scorematrix);
@@ -39,18 +39,19 @@ function combineimages(selector)
    imshow(reconstructed_img,[0 255]);
 end
 
-function showsegments(img,divisions_vertical,imgnum)
-    global segments scorematrix
+function showsegments(img,imgnum)
+    global segments scorematrix divisions_vertical
     %img = img(200:800,150:1500);
-    [nrows, ncols, dim] = size(img);
+    
     imgrange = [0 255];
     plot_nrows = 4;
 
     figure
+    
+    segments(:,:,:,:,imgnum) = segmentimg(img,divisions_vertical);
+    
     for n = 1:divisions_vertical
-        segments(:,:,:,n,imgnum) = img(:,((n-1)*floor(ncols/divisions_vertical))   +1:n*floor(ncols/divisions_vertical),:);
         subplot(plot_nrows,divisions_vertical,n), imshow(segments(:,:,:,n,imgnum),imgrange);
-        %reconstructed_img = horzcat(reconstructed_img, segments(:,:,:,n,imgnum));
     end
     
 
@@ -74,6 +75,13 @@ function showsegments(img,divisions_vertical,imgnum)
     %figure
     %imshow(reconstructed_img,imgrange);
 end   % end of function
+
+function output = segmentimg(img,divisions_vertical)
+    [nrows, ncols, dim] = size(img);
+    for n = 1:divisions_vertical
+        output(:,:,:,n) = img(:,((n-1)*floor(ncols/divisions_vertical))   +1:n*floor(ncols/divisions_vertical),:);
+    end
+end
 
 function output = normalizeimg(imgpath)
     img = imread(imgpath);
@@ -110,6 +118,10 @@ function [output_weight, detail_weight, output_thresh, detail_thresh] = subtract
     output = imsubtract(imgneg,background_illum);
     output_eq = imadjust(output);    
     output_eq(output_eq < 100) = 0;
+    
+    %remove saturated regions from detail map
+    output_eq(img < 30) = 0;
+    output_eq(img > 230) = 0;
     
     filter2 = fspecial('average', 5);
     output_filtered = imfilter(output_eq,filter2,'replicate');
