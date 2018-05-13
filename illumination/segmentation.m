@@ -5,16 +5,16 @@ clear all;
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
 global divisions_vertical n_images scorematrix segments reconstructed_img output_gradient output_merge
 
-divisions_vertical = 4;
-n_images = 1;
+divisions_vertical = 20;
+n_images = 5;
 scorematrix = zeros([divisions_vertical, n_images]);
 
 segments = [];
 reconstructed_img = [];
 
 for n = 1:n_images
-    %input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
-    input = normalizeimg(strcat('img_evaltests/dehazed.png'));
+    input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
+    %input = normalizeimg(strcat('img_evaltests/dehazed.png'));
     showsegments(input,n);
 end
 
