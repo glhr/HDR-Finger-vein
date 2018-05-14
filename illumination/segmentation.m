@@ -3,9 +3,9 @@ clear all;
 
 %showsegments('img_evaltests/segment_2.png',4);
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
-global divisions_vertical n_images scorematrix segments reconstructed_img segments_detail reconstructed_img_detail
+global divisions_vertical n_images scorematrix segments reconstructed_img segments_detail reconstructed_img_proc
 
-divisions_vertical = 4;
+divisions_vertical = 6;
 n_images = 5;
 scorematrix = zeros([divisions_vertical, n_images]);
 
@@ -13,10 +13,11 @@ segments = [];
 reconstructed_img = [];
 
 for n = 1:n_images
+    %input = normalizeimg(strcat('img_evaltests/test2 (',num2str(n),').png'));
     input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
     %input = normalizeimg(strcat('img_evaltests/1.png'));
     showsegments(input,n);
-    %subplot(1,n_images,n), imshow(input);
+    subplot(1,n_images,n), imshow(input);
 end
 
 selector = select_segments(scorematrix);
@@ -33,16 +34,32 @@ function selector = select_segments(scorematrix)
 end
 
 function combineimages(selector)
-   global divisions_vertical reconstructed_img reconstructed_img_detail segments segments_detail
+   global divisions_vertical reconstructed_img reconstructed_img_proc segments segments_detail
    for n = 1:divisions_vertical
-        reconstructed_img = horzcat(reconstructed_img, segments(:,:,:,n,selector(n)));
+       segment = segments(:,:,:,n,selector(n));
+       reconstructed_img = horzcat(reconstructed_img, segment);
    end
    for n = 1:divisions_vertical
-        reconstructed_img_detail = horzcat(reconstructed_img_detail, segments_detail(:,:,:,n,selector(n)));
+       segment = segments(:,:,:,n,selector(n));
+       p(1:256)=1;
+       edgeThreshold = 1;
+       amount = 0.1;
+       segment = uint8(255*mat2gray(segment));
+       %segment = localcontrast(segment, edgeThreshold, amount);
+       %segment = histeq(segment,p);
+       filter = fspecial('average', 60);
+       background_illum = imfilter(segment,filter,'replicate');
+       imin = double(min(background_illum(:)))/255
+       imax = double(max(background_illum(:)))/255
+       diff = (imax-imin)/10
+       
+       segment = imadjust(segment,[imin imax], [0 1]);
+        reconstructed_img_proc = horzcat(reconstructed_img_proc, segment);
    end
+   blur = imgaussfilt(reconstructed_img, [1 10]);
    figure;
    subplot(2,1,1),imshow(reconstructed_img,[0 255]);
-   subplot(2,1,2),imshow(reconstructed_img_detail,[0 255]);
+   subplot(2,1,2),imshow(normalizeimg(strcat('img_evaltests/segment_5.png')),[0 255]);
 end
 
 function showsegments(img,imgnum)
@@ -51,6 +68,7 @@ function showsegments(img,imgnum)
     
     imgrange = [0 255];
     plot_nrows = 6;
+    
 
     %figure
     [details_weight, details_thresh] = subtractillumination(img,0);
@@ -58,20 +76,20 @@ function showsegments(img,imgnum)
     %output_merge = mergefilters(details_weight, Gx, Gy, Gmag, Gdir);
     
     %% Plot results
-    %figure
+%     figure
 %     subplot(plot_nrows,divisions_vertical,1:divisions_vertical/2), imshow(details_weight,imgrange);
 %     subplot(plot_nrows,divisions_vertical,divisions_vertical/2+1:divisions_vertical), imshow(details_thresh,imgrange);
 %     gradients = [Gmag Gdir; Gx Gy];
 %     subplot(plot_nrows,divisions_vertical,divisions_vertical+1:divisions_vertical+(divisions_vertical/2)), imshow(gradients,imgrange);
 %      subplot(plot_nrows,divisions_vertical,divisions_vertical+(divisions_vertical/2)+1:divisions_vertical*2), imshow(edges,imgrange);
 %     subplot(plot_nrows,divisions_vertical,2*divisions_vertical+1:divisions_vertical*3), imshow(output_merge,imgrange);
-     
+%      
     %figure;
     segments_detail(:,:,:,:,imgnum) = segmentimg(details_thresh,divisions_vertical);
     for n = 1:divisions_vertical
         %subplot(plot_nrows,divisions_vertical,n+2*divisions_vertical), imshow(segments(:,:,:,n,imgnum),imgrange);
         score = evaldetail(segments_detail(:,:,:,n,imgnum));
-        title(sprintf("%i",score));
+        %title(sprintf("%i",score));
         scorematrix(n,imgnum) = score;
     end
 %     for n = 1:divisions_vertical
@@ -177,11 +195,11 @@ function [output_weight, output_thresh] = subtractillumination(img,plot)
     background_illum = imfilter(imgneg,filter,'replicate');
     output = imsubtract(imgneg,background_illum);
     output_eq = imadjust(output);    
-    output_eq(output_eq < 100) = 0;
+    %output_eq(output_eq < 100) = 0;
     
     %remove saturated regions from detail map
-    output_eq(img < 30) = 0;
-    output_eq(img > 230) = 0;
+    output_eq(img < 120) = 0;
+    output_eq(img > 210) = 0;
     
     filter2 = fspecial('average', [3 10]);
     output_filtered = imfilter(output_eq,filter2,'replicate');
