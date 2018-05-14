@@ -3,25 +3,26 @@ close all;
 clc;
 
 %% Connect to Raspberry Pi Board, Address, User, Password
-%rpi = raspi('169.254.0.2', 'pi', 'raspberry'); 
-rpi = raspi('130.89.237.20', 'pi', 'raspberry');
+rpi = raspi('169.254.0.2', 'pi', 'raspberry'); 
+%rpi = raspi('130.89.237.20', 'pi', 'raspberry');
 
 %% exposure settings
 % fireworks -> good lighting but no detail
 % spotlight -> way too dark
 
 resolution = '800x600'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
-exposure = 'night';
+exposure = 'auto';
 awb = 'auto';
-metering = 'average';
+metering = 'spot';
 exposure_comp = 0;
-effect = 'negative';
+brightness = 10;
+contrast = 90;
 
 %% Create cameraobject and set camera options
 cam = cameraboard(rpi, 'Resolution',resolution, 'Quality', 100);
 cam.Rotation = 180;
-cam.Brightness = 52;
-cam.Contrast = 90;
+cam.Brightness = brightness;
+cam.Contrast = contrast;
 cam.Sharpness = 0;
 cam.Saturation = 0;
 cam.ExposureMode= exposure;
@@ -46,6 +47,9 @@ LED_driver = i2cdev(rpi,buses,address);
 
 %TurnOffLed(LED_driver);
 
+folder = strcat('img_',datestr(now,'mm-dd_HH-MM-SS'));
+mkdir(folder);
+
 % Test effect of varying the intensity of a single LED at a time
 % for j = 1:8
 %     if(j>1)
@@ -65,16 +69,18 @@ TurnOffLed(LED_driver);
 
 cam.MeteringMode = 'average';
 
+pwms = [0 1 0 1 0 1 0 1];
+    
 %% Test different levels of homogeneous illumination
 for pwm = 0:100:1023
     for j = 1:8
-        setLed(LED_driver, j+7, pwm);
+        setLed(LED_driver, j+7, pwms(j)*pwm);
         frame = rgb2gray(snapshot(cam));
         %imagesc(frame);
         %colormap('gray');
         %drawnow;
     end
-    imwrite(frame, strcat('img_illum/black comparison/thumb_global_',num2str(pwm),'_black_lowres_avg.png'), 'png','bitdepth', 8);
+    imwrite(frame, strcat(folder,'/global_',num2str(pwm),'_exp',exposure,'_awb',num2str(awb),'_br',num2str(brightness),'_contr',num2str(contrast),'.png'), 'png','bitdepth', 8);
 end
 
 %% Done
