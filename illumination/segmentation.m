@@ -3,10 +3,10 @@ clear all;
 
 %showsegments('img_evaltests/segment_2.png',4);
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
-global divisions_vertical n_images scorematrix segments reconstructed_img segments_detail reconstructed_img_proc
+global divisions_vertical n_images scorematrix segments reconstructed_img resolution
 
-divisions_vertical = 6;
-n_images = 5;
+divisions_vertical = 4;
+n_images = 3;
 scorematrix = zeros([divisions_vertical, n_images]);
 
 segments = [];
@@ -14,10 +14,10 @@ reconstructed_img = [];
 
 for n = 1:n_images
     %input = normalizeimg(strcat('img_evaltests/test2 (',num2str(n),').png'));
-    input = normalizeimg(strcat('img_evaltests/segment_',num2str(n),'.png'));
+    input = normalizeimg(strcat('img_evaltests/dataset3/segment (',num2str(n),').png'));
     %input = normalizeimg(strcat('img_evaltests/1.png'));
     showsegments(input,n);
-    subplot(1,n_images,n), imshow(input);
+    %subplot(1,n_images,n), imshow(input);
 end
 
 selector = select_segments(scorematrix);
@@ -41,9 +41,7 @@ function combineimages(selector)
    end
    for n = 1:divisions_vertical
        segment = segments(:,:,:,n,selector(n));
-       p(1:256)=1;
-       edgeThreshold = 1;
-       amount = 0.1;
+
        segment = uint8(255*mat2gray(segment));
        %segment = localcontrast(segment, edgeThreshold, amount);
        %segment = histeq(segment,p);
@@ -59,7 +57,7 @@ function combineimages(selector)
    blur = imgaussfilt(reconstructed_img, [1 10]);
    figure;
    subplot(2,1,1),imshow(reconstructed_img,[0 255]);
-   subplot(2,1,2),imshow(normalizeimg(strcat('img_evaltests/segment_5.png')),[0 255]);
+   %subplot(2,1,2),imshow(normalizeimg(strcat('img_evaltests/segment_5.png')),[0 255]);
 end
 
 function showsegments(img,imgnum)
@@ -71,7 +69,7 @@ function showsegments(img,imgnum)
     
 
     %figure
-    [details_weight, details_thresh] = subtractillumination(img,0);
+    [details_weight, details_thresh] = subtractillumination(img,2);
     [Gmag, Gdir, Gx, Gy, edges] = gradient(img,0);
     %output_merge = mergefilters(details_weight, Gx, Gy, Gmag, Gdir);
     
@@ -150,21 +148,31 @@ function output_merge = mergefilters(illum_subtract, Gx, Gy, Gmag, Gdir)
 end
 
 function output = normalizeimg(imgpath)
+global resolution
     img = imread(imgpath);
     [height, width, dim] = size(img);
+    resolution = width;
     if (height == 1080 && width == 1920)
         fprintf('Input image size: 1080 x 1920\n');
         output = img(380:680,240:1450);
         output = imresize(output, [75 NaN]);
+    elseif(height == 600 && width == 800)
+        fprintf('Input image size: 600 x 800\n');
+        output = img(260:335,175:575);
+        %output = imresize(output, [75 NaN]);
     else
         output = img;
     end
 end
 
 function [Gmag, Gdir, Gx, Gy, edges] = gradient(img,plot)
-
-    radius = 10;
-    J1 = fspecial('average', [3 10]);
+global resolution
+    if(resolution == 1920)
+        radius = [3 10];
+    elseif(resolution == 800)
+        radius = [2 6];
+    end
+    J1 = fspecial('average', radius);
     img_filtered = imfilter(img,J1,'replicate');
     [Gmag, Gdir] = imgradient(img_filtered,'prewit');
     [Gx, Gy] = imgradientxy(img_filtered,'prewit');
@@ -189,19 +197,38 @@ function [Gmag, Gdir, Gx, Gy, edges] = gradient(img,plot)
 end
 
 function [output_weight, output_thresh] = subtractillumination(img,plot)
-    
+    global resolution
     imgneg = uint8(255*mat2gray(imcomplement(img)));
-    filter = fspecial('average', [20 10]);
+    if(resolution == 1920)
+        radius = [20 10];
+    elseif(resolution == 800)
+        radius = [30 15];
+    end
+    filter = fspecial('average', radius);
     background_illum = imfilter(imgneg,filter,'replicate');
     output = imsubtract(imgneg,background_illum);
     output_eq = imadjust(output);    
     %output_eq(output_eq < 100) = 0;
     
     %remove saturated regions from detail map
-    output_eq(img < 120) = 0;
-    output_eq(img > 210) = 0;
+    if(resolution == 1920)
+        thresh_low = 120;
+        thresh_high = 210;
+    elseif(resolution == 800)
+        thresh_low = 50;
+        thresh_high = 225;
+    end
     
-    filter2 = fspecial('average', [3 10]);
+    output_eq(img < thresh_low) = 0;
+    output_eq(img > thresh_high) = 0;
+    
+   if(resolution == 1920)
+        radius = [3 10];
+    elseif(resolution == 800)
+        radius = [2 6];
+    end
+    
+    filter2 = fspecial('average', radius);
     output_filtered = imfilter(output_eq,filter2,'replicate');
     
     output_weight = output_eq;

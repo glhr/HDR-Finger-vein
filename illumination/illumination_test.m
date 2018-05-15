@@ -3,19 +3,19 @@ close all;
 clc;
 
 %% Connect to Raspberry Pi Board, Address, User, Password
-rpi = raspi('169.254.0.2', 'pi', 'raspberry'); 
+rpi = raspi('169.254.0.2', 'pi', 'strawberry'); 
 %rpi = raspi('130.89.237.20', 'pi', 'raspberry');
 
 %% exposure settings
 % fireworks -> good lighting but no detail
 % spotlight -> way too dark
 
-resolution = '800x600'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
-exposure = 'auto';
+resolution = '1920x1080'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
+exposure = 'night';
 awb = 'auto';
 metering = 'spot';
 exposure_comp = 0;
-brightness = 10;
+brightness = 30;
 contrast = 90;
 
 %% Create cameraobject and set camera options
@@ -69,10 +69,14 @@ TurnOffLed(LED_driver);
 
 cam.MeteringMode = 'average';
 
-pwms = [0 1 0 1 0 1 0 1];
+if(strcmp(resolution,'800x600'))
+    pwms = [0 1 0 1 0 1 0 1];
+elseif(strcmp(resolution,'1920x1080'))
+    pwms = [1 0 0 1 0 1 0 1];
+end
     
 %% Test different levels of homogeneous illumination
-for pwm = 0:100:1023
+for pwm = 0:10:150
     for j = 1:8
         setLed(LED_driver, j+7, pwms(j)*pwm);
         frame = rgb2gray(snapshot(cam));
