@@ -7,8 +7,8 @@ global divisions_vertical n_images scorematrix segments reconstructed_img resolu
 global background_filter_radius gradient_filter_radius suppress_detail_thresh detailweight_filter_radius
 global edge_width
 
-divisions_vertical = 6;
-n_images = 3;
+divisions_vertical = 10;
+n_images = 5;
 scorematrix = zeros([divisions_vertical, n_images]);
 
 segments = [];
@@ -20,7 +20,7 @@ reconstructed_img = [];
 
 for n = 1:n_images
     %input = normalizeimg(strcat('img_evaltests/test2 (',num2str(n),').png'));
-    input = normalizeimg(strcat('img_evaltests/dataset3/segment (',num2str(n),').png'));
+    input = normalizeimg(strcat('img_evaltests/dataset2/segment (',num2str(n),').png'));
     setglobals();
     %input = normalizeimg(strcat('img_evaltests/1.png'));
     showsegments(input,n);
@@ -38,12 +38,14 @@ global edge_width detail_thresh
         background_filter_radius = [20 10];
         gradient_filter_radius = [3 10];
         detailweight_filter_radius = [3 10];
-        suppress_detail_thresh = [120 210];
+        suppress_detail_thresh = [90 220];
+        edge_width = 4;
+        detail_thresh = 80;
     elseif(resolution == 800)
         background_filter_radius = [22 11];
         gradient_filter_radius = [2 6];
         detailweight_filter_radius = [2 6];
-        suppress_detail_thresh = [10 225];
+        suppress_detail_thresh = [50 225];
         edge_width = 4;
         detail_thresh = 60;
     end
