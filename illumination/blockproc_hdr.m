@@ -7,17 +7,32 @@ files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/datase
 %files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/dataset2/segment_cropped (2).png'};
 metafile = {'img_evaltests/dataset2/segment4meta.png'};
 expTimes = [];
-n_segments = 4;
+n_segments = 50;
 images = cell(n_segments,numel(files));
 
 for i = 1:numel(files)
     path = cell2mat(files(i));
     img = imread(path);
     segments = segmentimg(img,n_segments);
-    
+    %filter = fspecial('average', [22 11]);
+
     for j=1:n_segments
         images{j,i} = segments{j};
+        %background_illum{j,i} = imfilter(segments{j},filter,'replicate');
+        %exposures{j}(i) = mean(background_illum{j,i}(:));
         exposures{j}(i) = mean(images{j,i}(:));
+    end
+	
+end
+
+for i = 1:numel(files)
+    path = cell2mat(files(i));
+    img = imread(path);
+    segments = segmentimg(img,n_segments);
+
+    for j=1:n_segments
+        images{j,i} = segments{j};
+
     end
 	
 end
@@ -28,7 +43,7 @@ montage(files)
 %%plot HDR output for each segments
 %figure;
 for i=1:n_segments
-    exp_normalized{i} = exposures{i}./exposures{i}(1);
+    exp_normalized{i} = exposures{i}./exposures{n_segments}(1);
     hdr{i} = makehdr_mod(metafile,images(i,:),'RelativeExposure',exp_normalized{i});
     %figure, imshow(hdr); %was just curious what it looks like
     rgb{i} = tonemap(hdr{i});
