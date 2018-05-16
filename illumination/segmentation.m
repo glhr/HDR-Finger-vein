@@ -4,17 +4,23 @@ clear all;
 %showsegments('img_evaltests/segment_2.png',4);
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
 global divisions_vertical n_images scorematrix segments reconstructed_img resolution
+global background_filter_radius gradient_filter_radius suppress_detail_thresh detailweight_filter_radius
 
-divisions_vertical = 4;
-n_images = 3;
+divisions_vertical = 6;
+n_images = 13;
 scorematrix = zeros([divisions_vertical, n_images]);
 
 segments = [];
 reconstructed_img = [];
 
+
+
+%%
+
 for n = 1:n_images
     %input = normalizeimg(strcat('img_evaltests/test2 (',num2str(n),').png'));
     input = normalizeimg(strcat('img_evaltests/dataset3/segment (',num2str(n),').png'));
+    setglobals();
     %input = normalizeimg(strcat('img_evaltests/1.png'));
     showsegments(input,n);
     %subplot(1,n_images,n), imshow(input);
@@ -22,6 +28,22 @@ end
 
 selector = select_segments(scorematrix);
 combineimages(selector);
+
+function setglobals()
+global resolution background_filter_radius gradient_filter_radius suppress_detail_thresh detailweight_filter_radius
+    %%Filter settings
+    if(resolution == 1920)
+        background_filter_radius = [20 10];
+        gradient_filter_radius = [3 10];
+        detailweight_filter_radius = [3 10];
+        suppress_detail_thresh = [120 210];
+    elseif(resolution == 800)
+        background_filter_radius = [30 15];
+        gradient_filter_radius = [2 6];
+        detailweight_filter_radius = [2 6];
+        suppress_detail_thresh = [50 225];
+    end
+end
 
 function selector = select_segments(scorematrix)
 
@@ -83,7 +105,7 @@ function showsegments(img,imgnum)
 %     subplot(plot_nrows,divisions_vertical,2*divisions_vertical+1:divisions_vertical*3), imshow(output_merge,imgrange);
 %      
     %figure;
-    segments_detail(:,:,:,:,imgnum) = segmentimg(details_thresh,divisions_vertical);
+    segments_detail(:,:,:,:,imgnum) = segmentimg(details_weight,divisions_vertical);
     for n = 1:divisions_vertical
         %subplot(plot_nrows,divisions_vertical,n+2*divisions_vertical), imshow(segments(:,:,:,n,imgnum),imgrange);
         score = evaldetail(segments_detail(:,:,:,n,imgnum));
@@ -166,17 +188,12 @@ global resolution
 end
 
 function [Gmag, Gdir, Gx, Gy, edges] = gradient(img,plot)
-global resolution
-    if(resolution == 1920)
-        radius = [3 10];
-    elseif(resolution == 800)
-        radius = [2 6];
-    end
-    J1 = fspecial('average', radius);
+global gradient_filter_radius
+
+    J1 = fspecial('average', gradient_filter_radius);
     img_filtered = imfilter(img,J1,'replicate');
     [Gmag, Gdir] = imgradient(img_filtered,'prewit');
     [Gx, Gy] = imgradientxy(img_filtered,'prewit');
-    
     
     %[Gx, Gy] = imgradient(I,'central');
     
@@ -197,38 +214,20 @@ global resolution
 end
 
 function [output_weight, output_thresh] = subtractillumination(img,plot)
-    global resolution
+    global background_filter_radius suppress_detail_thresh detailweight_filter_radius
     imgneg = uint8(255*mat2gray(imcomplement(img)));
-    if(resolution == 1920)
-        radius = [20 10];
-    elseif(resolution == 800)
-        radius = [30 15];
-    end
-    filter = fspecial('average', radius);
+
+    filter = fspecial('average', background_filter_radius);
     background_illum = imfilter(imgneg,filter,'replicate');
     output = imsubtract(imgneg,background_illum);
     output_eq = imadjust(output);    
     %output_eq(output_eq < 100) = 0;
     
-    %remove saturated regions from detail map
-    if(resolution == 1920)
-        thresh_low = 120;
-        thresh_high = 210;
-    elseif(resolution == 800)
-        thresh_low = 50;
-        thresh_high = 225;
-    end
+    %remove saturated regions from detail map  
+    output_eq(img < suppress_detail_thresh(1)) = 0;
+    output_eq(img > suppress_detail_thresh(2)) = 0;
     
-    output_eq(img < thresh_low) = 0;
-    output_eq(img > thresh_high) = 0;
-    
-   if(resolution == 1920)
-        radius = [3 10];
-    elseif(resolution == 800)
-        radius = [2 6];
-    end
-    
-    filter2 = fspecial('average', radius);
+    filter2 = fspecial('average', detailweight_filter_radius);
     output_filtered = imfilter(output_eq,filter2,'replicate');
     
     output_weight = output_eq;
