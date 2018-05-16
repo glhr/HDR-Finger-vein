@@ -5,9 +5,10 @@ clear all;
 %subtractillumination(imread('img_evaltests/dehazed.png'),1);
 global divisions_vertical n_images scorematrix segments reconstructed_img resolution
 global background_filter_radius gradient_filter_radius suppress_detail_thresh detailweight_filter_radius
+global edge_width
 
 divisions_vertical = 6;
-n_images = 13;
+n_images = 3;
 scorematrix = zeros([divisions_vertical, n_images]);
 
 segments = [];
@@ -31,6 +32,7 @@ combineimages(selector);
 
 function setglobals()
 global resolution background_filter_radius gradient_filter_radius suppress_detail_thresh detailweight_filter_radius
+global edge_width detail_thresh
     %%Filter settings
     if(resolution == 1920)
         background_filter_radius = [20 10];
@@ -38,10 +40,12 @@ global resolution background_filter_radius gradient_filter_radius suppress_detai
         detailweight_filter_radius = [3 10];
         suppress_detail_thresh = [120 210];
     elseif(resolution == 800)
-        background_filter_radius = [30 15];
+        background_filter_radius = [22 11];
         gradient_filter_radius = [2 6];
         detailweight_filter_radius = [2 6];
-        suppress_detail_thresh = [50 225];
+        suppress_detail_thresh = [10 225];
+        edge_width = 4;
+        detail_thresh = 60;
     end
 end
 
@@ -215,6 +219,7 @@ end
 
 function [output_weight, output_thresh] = subtractillumination(img,plot)
     global background_filter_radius suppress_detail_thresh detailweight_filter_radius
+    global edge_width detail_thresh
     imgneg = uint8(255*mat2gray(imcomplement(img)));
 
     filter = fspecial('average', background_filter_radius);
@@ -226,19 +231,25 @@ function [output_weight, output_thresh] = subtractillumination(img,plot)
     %remove saturated regions from detail map  
     output_eq(img < suppress_detail_thresh(1)) = 0;
     output_eq(img > suppress_detail_thresh(2)) = 0;
+    output_eq(1:edge_width,:) = 0;
+    output_eq((size(img,1)-edge_width):size(img,1),:) = 0;
+    output_eq(:,1:edge_width) = 0;
+    output_eq(:,(size(img,2)-edge_width):size(img,2)) = 0;
     
     filter2 = fspecial('average', detailweight_filter_radius);
     output_filtered = imfilter(output_eq,filter2,'replicate');
     
     output_weight = output_eq;
-    output_thresh = imadjust(uint8(output_filtered>80));
+    output_thresh = imadjust(uint8(output_filtered>detail_thresh));
 
     if(plot == 2) % plot everything
         figure;
-        subplot(2,2,1),imshow(img,[0 255]); title(sprintf("Original image"));
-        subplot(2,2,2),imshow(imgneg,[0 255]); title(sprintf("Negative image"));
-        subplot(2,2,3),imshow(background_illum,[0 255]); title(sprintf("Background illumination estimated\n by applying average filter"));
-        subplot(2,2,4),imshow(output_weight,[0 255]), title(sprintf("After subtracting background\n illumination from negative image"));
+        subplot(3,2,1),imshow(img,[0 255]); title(sprintf("Original image"));
+        subplot(3,2,2),imshow(imgneg,[0 255]); title(sprintf("Negative image"));
+        subplot(3,2,3),imshow(background_illum,[0 255]); title(sprintf("Background illumination estimated\n by applying average filter"));
+        subplot(3,2,4),imshow(output_weight,[0 255]), title(sprintf("After subtracting background\n illumination from negative image"));
+        subplot(3,2,5),imshow(output_filtered,[0 255]), title(sprintf("After averaging"));
+        subplot(3,2,6),imshow(output_thresh,[0 255]), title(sprintf("After applying thresholding"));
     elseif(plot == 1) % only plot essentials
         figure;
         subplot(2,1,1),imshow(img,[0 255]);
