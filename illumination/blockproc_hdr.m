@@ -7,24 +7,34 @@ files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/datase
 %files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/dataset2/segment_cropped (2).png'};
 metafile = {'img_evaltests/dataset2/segment4meta.png','img_evaltests/dataset2/segment4meta.png'};
 expTimes = [];
-images = {};
-n_segments = 2;
+n_segments = 4;
+images = cell(n_segments,numel(files));
 
 for i = 1:numel(files)
     path = cell2mat(files(i));
     img = imread(path);
     segments = segmentimg(img,n_segments);
-    images{i} = segments{1};
-    img = images{i};
-	expTimes(i) = mean(img(:));
+    
+    for j=1:n_segments
+        images{j,i} = segments{j};
+        exposures{j}(i) = mean(images{j,i}(:));
+    end
+	
 end
 
 montage(files)
-hdr = makehdr_mod(metafile,images,'RelativeExposure',expTimes./expTimes(1));
-%figure, imshow(hdr); %was just curious what it looks like
-rgb = tonemap(hdr);
+
+
+%%plot HDR output for each segments
 figure;
-imshow(rgb)
+for i=1:n_segments
+    exp_normalized{i} = exposures{i}./exposures{i}(1);
+    hdr{i} = makehdr_mod(metafile,images(i,:),'RelativeExposure',exp_normalized{i});
+    %figure, imshow(hdr); %was just curious what it looks like
+    rgb{i} = tonemap(hdr{i});
+    subplot(1,n_segments,i);
+    imshow(rgb{i});
+end
 
 function output = segmentimg(img,divisions_vertical)
     output = cell(1,divisions_vertical);
