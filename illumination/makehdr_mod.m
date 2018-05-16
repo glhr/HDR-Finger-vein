@@ -94,7 +94,7 @@ meta = getMetaData(filenames{1});
 
 varargin = matlab.images.internal.stringToChar(varargin);
 options = parseArgs(meta, varargin{:});
-validateOptions(filenames, options);
+validateOptions(images, options);
 
 % Get the minimum exposure image from the user or make a first pass through
 % the images to find the lowest exposure image.
