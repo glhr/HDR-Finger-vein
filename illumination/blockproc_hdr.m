@@ -7,7 +7,7 @@ files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/datase
 %files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/dataset2/segment_cropped (2).png'};
 metafile = {'img_evaltests/dataset2/segment4meta.png'};
 expTimes = [];
-n_segments = 50;
+n_segments = 10;
 images = cell(n_segments,numel(files));
 
 for i = 1:numel(files)
@@ -43,7 +43,7 @@ montage(files)
 %%plot HDR output for each segments
 %figure;
 for i=1:n_segments
-    exp_normalized{i} = exposures{i}./exposures{n_segments}(1);
+    exp_normalized{i} = exposures{i}./exposures{1}(1);
     hdr{i} = makehdr_mod(metafile,images(i,:),'RelativeExposure',exp_normalized{i});
     %figure, imshow(hdr); %was just curious what it looks like
     
