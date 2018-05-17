@@ -46,13 +46,15 @@ for i=1:n_segments
     exp_normalized{i} = exposures{i}./exposures{n_segments}(1);
     hdr{i} = makehdr_mod(metafile,images(i,:),'RelativeExposure',exp_normalized{i});
     %figure, imshow(hdr); %was just curious what it looks like
-    rgb{i} = tonemap(hdr{i});
+    
     %subplot(1,n_segments,i);
     %imshow(rgb{i});
 end
 
+hdrresult = reconstructimg(hdr);
+rgb = tonemap(hdrresult);
 figure;
-imshow(reconstructimg(rgb));
+imshow(rgb);
 hdr_global();
 
 function hdr_global()
