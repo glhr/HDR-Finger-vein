@@ -120,12 +120,6 @@ for p = 1:numel(images)
         relExposure = 2 .^ options.ExposureValues(p);
     elseif ~isempty(options.RelativeExposure)
         relExposure = options.RelativeExposure(p);
-    else
-		[this_ExposureTime, this_FNumber] = getExposure(fname);
-        relExposure = computeRelativeExposure(baseFStop, ...
-                                              baseTime, ...
-                                              this_FNumber, ...
-                                              this_ExposureTime);
     end
 
     % Read the LDR image
