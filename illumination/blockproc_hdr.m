@@ -7,8 +7,12 @@ files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/datase
 %files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/dataset2/segment_cropped (2).png'};
 metafile = {'img_evaltests/dataset2/segment4meta.png'};
 expTimes = [];
-n_segments = 10;
+n_segments = 150;
 images = cell(n_segments,numel(files));
+
+global exposure_min exposure_max
+exposure_min = 1;
+exposure_max = 255;
 
 for i = 1:numel(files)
     path = cell2mat(files(i));
@@ -44,7 +48,7 @@ montage(files)
 %figure;
 for i=1:n_segments
     exp_normalized{i} = exposures{i}./exposures{1}(1);
-    hdr{i} = makehdr_mod(metafile,images(i,:),'RelativeExposure',exp_normalized{i});
+    hdr{i} = makehdr_mod(metafile,images(i,:),'RelativeExposure',exp_normalized{i},'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
     %figure, imshow(hdr); %was just curious what it looks like
     
     %subplot(1,n_segments,i);
@@ -58,6 +62,7 @@ imshow(rgb);
 hdr_global();
 
 function hdr_global()
+global exposure_min exposure_max
     files = {'img_evaltests/dataset2/segment_cropped (1).png', 'img_evaltests/dataset2/segment_cropped (2).png', 'img_evaltests/dataset2/segment_cropped (3).png',...  
          'img_evaltests/dataset2/segment_cropped (4).png', 'img_evaltests/dataset2/segment_cropped (5).png'}; 
     expTimes = [0.0333, 0.1000, 0.3333, 0.6250, 1.3000]; 
@@ -69,7 +74,7 @@ function hdr_global()
     end 
  
     %montage(files) 
-    hdr = makehdr(files,'RelativeExposure',expTimes./expTimes(1)); 
+    hdr = makehdr(files,'RelativeExposure',expTimes./expTimes(1),'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
     rgb = tonemap(hdr); 
     figure; 
     subplot(2,1,1),imshow(rgb);
