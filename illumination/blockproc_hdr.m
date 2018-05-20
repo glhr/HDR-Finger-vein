@@ -29,18 +29,6 @@ for i = 1:numel(files)
 	
 end
 
-for i = 1:numel(files)
-    path = cell2mat(files(i));
-    img = imread(path);
-    segments = segmentimg(img,n_segments);
-
-    for j=1:n_segments
-        images{j,i} = segments{j};
-
-    end
-	
-end
-
 montage(files)
 
 
