@@ -1,4 +1,4 @@
-function hdr = makehdr(filenames, images, varargin)
+function hdr = makehdr_mod(filenames, images, varargin)
 %MAKEHDR    Create high dynamic range image.
 %   HDR = MAKEHDR(FILES) creates the single-precision high dynamic range
 %   image HDR from the set of spatially registered low dynamic range images
@@ -96,14 +96,6 @@ varargin = matlab.images.internal.stringToChar(varargin);
 options = parseArgs(meta, varargin{:});
 validateOptions(images, options);
 
-% Get the minimum exposure image from the user or make a first pass through
-% the images to find the lowest exposure image.
-if ~isempty(options.BaseFile)
-    [baseTime, baseFStop] = getExposure(options.BaseFile);
-elseif (isempty(options.RelativeExposure) && isempty(options.ExposureValues))
-    [baseTime, baseFStop] = getAverageExposure(filenames);
-end
-
 % Create output variables for an accumulator and the number of LDR images
 % that contributed to each pixel.
 [hdr, properlyExposedCount] = makeContainers(meta,filenames{1});
@@ -179,86 +171,6 @@ if any(fillMask(:))
 end
 
 %--------------------------------------------------------------------------
-function [baseTime, baseFStop] = getExposure(filename)
-% Extract the exposure values from a file containing EXIF metadata.
-
-exif = getExposureDataFromFile(filename);
-baseFStop = exif.FNumber;
-baseTime = exif.ExposureTime;
-
-%--------------------------------------------------------------------------
-function [baseTime, baseFStop] = getAverageExposure(filenames)
-% Extract the average exposure (assuming constant illumination) from a set
-% of files containing EXIF metadata.  The average exposure may not actually
-% correspond to the exposure of any particular image.
-
-minTime = 0;
-minFStop = 0;
-maxTime = 0;
-maxFStop = 0;
-
-% Look through all of the files and keep track of the least and greatest
-% exposure.
-for p = 1:numel(filenames)
-    exif = getExposureDataFromFile(filenames{p});
-    if (p == 1)
-        % First file.
-        minFStop = exif.FNumber;
-        minTime = exif.ExposureTime;
-        maxFStop = exif.FNumber;
-        maxTime = exif.ExposureTime;
-    else
-        % Nth file.
-        if (computeRelativeExposure(minFStop, ...
-                                    minTime, ...
-                                    exif.FNumber, ...
-                                    exif.ExposureTime) < 1)
-
-            % Image has least exposure so far.
-            minFStop = exif.FNumber;
-            minTime = exif.ExposureTime;
-            
-        elseif (computeRelativeExposure(maxFStop, ...
-                                        maxTime, ...
-                                        exif.FNumber, ...
-                                        exif.ExposureTime) > 1)
-            
-            % Image has most exposure so far.
-            maxFStop = exif.FNumber;
-            maxTime = exif.ExposureTime;
-        end
-    end
-end
-
-% Determine the "middle" exposure value.  It's easier to manipulate
-% exposure time rather than f/stop.
-re = computeRelativeExposure(minFStop, minTime, ...
-                             maxFStop, maxTime);
-baseFStop = minFStop;
-baseTime  = minTime * log2(re);
-
-%--------------------------------------------------------------------------
-function exif = getExposureDataFromFile(filename)
-% Extract exposure metadata from a file containing EXIF.
-
-meta = getMetaData(filename);
-if isfield(meta, 'DigitalCamera')
-    exif = meta.DigitalCamera;
-else
-    error(message('images:makehdr:exifFormat', filename, ...
-        ['Use the ''ExposureValues'' or ''RelativeExposure'' ' ...
-        'parameter to provide exposure information.']));
-end
-
-if (isempty(exif) || ...
-    ~isstruct(exif) || ...
-    ~isfield(exif, 'FNumber') || ...
-    ~isfield(exif, 'ExposureTime'))
-    
-    error(message('images:makehdr:noExposureMetadata', filename))
-end
-
-%--------------------------------------------------------------------------
 function meta = getMetaData(filename)
 
 try
@@ -277,13 +189,6 @@ end
 if ~isscalar(meta)
     meta = meta(1);
 end
-
-%--------------------------------------------------------------------------
-function relExposure = computeRelativeExposure(f1, t1, f2, t2)
-
-% Exposure varies directly with the exposure time and inversely with the
-% square of the F-stop number. 
-relExposure = (f1 / f2)^2 * (t2 / t1);
 
 %--------------------------------------------------------------------------
 function options = parseArgs(meta, varargin)
