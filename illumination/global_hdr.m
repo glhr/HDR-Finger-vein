@@ -85,7 +85,7 @@ for i = 1:numel(files)
     %expTimes(i) = mean(img(:)); 
     %expTimes{i} = img;
     expTimes{i}=zeros(size(img));
-    expTimes{i}= movmean(img,100,1);
+    expTimes{i}= movmean(img,75,1);
     expNormalized{i} = expTimes{i}./expTimes{i}(1);
 end 
 
