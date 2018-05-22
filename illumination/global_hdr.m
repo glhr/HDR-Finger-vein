@@ -46,11 +46,11 @@ for i = 1:5
           if(j>=302-segwidth)
               block = img(:,j:302);
               expTimes{i}(:,j:302)= mean(block(:)); 
-              expNormalized{i}(:,j:302) = expTimes{i}(:,j:302)./expTimes{i}(1,1);
+              expNormalized{i}(:,j:302) = expTimes{i}(:,j:302)./double(expTimes{i}(1,1));
           else
               block = img(:,j:j+segwidth);
               expTimes{i}(:,j:j+segwidth)= mean(block(:)); 
-              expNormalized{i}(:,j:j+segwidth) = expTimes{i}(:,j:j+segwidth)./expTimes{i}(1,1);
+              expNormalized{i}(:,j:j+segwidth) = expTimes{i}(:,j:j+segwidth)./double(expTimes{i}(1,1));
           end
       end
 end 
