@@ -16,20 +16,23 @@ LED_driver = i2cdev(rpi,buses,address);
 
 TurnOffLed(LED_driver);
 
-pwms = [4 0 0 1 3 1 0 1];
+pwms = [1 0 1 0 2 0 1 0];
 
 %% Test different levels of homogeneous illumination
-
+while(1)
+for pwm = 0:100:1000
     for j = 1:8
-        setLed(LED_driver, j+7, pwms(j)*200);
+        setLed(LED_driver, j+7, pwms(j)*pwm);
         %imagesc(frame);
         %colormap('gray');
         %drawnow;
     end
-
+    pause(1);
+end
+end
 
 %% Done
-%TurnOffLed(LED_driver)
+TurnOffLed(LED_driver)
 
 %% setLed turn the LED on channel on with the value.
 %byte1 are 8 top bits of value and byte2 are the 8 lower bits of value.  
