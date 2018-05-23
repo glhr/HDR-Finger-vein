@@ -3,8 +3,9 @@ close all;
 clc;
 
 %% Connect to Raspberry Pi Board, Address, User, Password
-rpi = raspi('169.254.0.2', 'pi', 'strawberry'); 
+rpi = raspi('192.168.1.103', 'pi', 'raspberry'); 
 %rpi = raspi('130.89.237.20', 'pi', 'raspberry');
+
 
 %% exposure settings
 % fireworks -> good lighting but no detail
@@ -70,13 +71,13 @@ TurnOffLed(LED_driver);
 cam.MeteringMode = 'average';
 
 if(strcmp(resolution,'800x600'))
-    pwms = [0 1 0 1 0 1 0 1];
+    pwms = [1 0 0 1 0 1 0 1];
 elseif(strcmp(resolution,'1920x1080'))
     pwms = [1 0 0 1 0 1 0 1];
 end
     
 %% Test different levels of homogeneous illumination
-for pwm = 0:10:150
+for pwm = 0:10:200
     for j = 1:8
         setLed(LED_driver, j+7, pwms(j)*pwm);
         frame = rgb2gray(snapshot(cam));
