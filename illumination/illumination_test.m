@@ -14,9 +14,9 @@ rpi = raspi('192.168.1.103', 'pi', 'raspberry');
 resolution = '1920x1080'; %'160x120', '320x240', '640x480', '800x600', '1024x768', '1280x720', '1920x1080'
 exposure = 'night';
 awb = 'auto';
-metering = 'spot';
+metering = 'backlit';
 exposure_comp = 0;
-brightness = 30;
+brightness = 20;
 contrast = 90;
 
 %% Create cameraobject and set camera options
@@ -33,8 +33,8 @@ cam.ExposureCompensation= 0;
 cam.AWBMode = awb;
 %'auto (default) | 'off' | 'sun' | 'cloud' | 'shade' | 'tungsten' | 'fluorescent' | 'incandescent' | 'flash' | 'horizon'
 cam.MeteringMode = metering;
-%cam.ROI = [0.04 0.1 0.81 0.8];
-cam.ROI = [0 0 1 1];
+cam.ROI = [0.04 0.1 0.81 0.8];
+%cam.ROI = [0 0 1 1];
 
 %% Set I2C speed and connect with the LED driver
 disableI2C(rpi)
