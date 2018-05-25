@@ -29,8 +29,9 @@ camera.resolution = (800,600)
 camera.start_preview()
 camera.zoom = (0.0, 0.0, 1.0, 1.0) 
 camera.exposure_mode = 'off'
-camera.shutter_speed = 30000
+camera.shutter_speed = 50000
 camera.awb_mode = 'auto'
+camera.saturation = -100
 #camera.meter_mode = 'spot'
 #camera.shutter_speed = 20000
 #camera.shutter_speed = camera.exposure_speed
