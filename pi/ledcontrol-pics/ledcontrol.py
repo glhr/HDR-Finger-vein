@@ -13,7 +13,7 @@ DEVICE_ADDRESS = 0x04      #7 bit address (will be left shifted to add the read 
 
 time.sleep(1)
 
-leds = [0, 0, 0, 0, 0, 0, 0, 1]
+ledstrip = [0, 1, 0, 0, 1, 0, 0, 0.5]
 
 def ledsoff():
 	bus.write_i2c_block_data(DEVICE_ADDRESS, 16, [0, 0]) #turn off all the LEDs
@@ -29,16 +29,16 @@ camera.resolution = (800,600)
 camera.start_preview()
 camera.zoom = (0.0, 0.0, 1.0, 1.0) 
 camera.exposure_mode = 'off'
-camera.shutter_speed = 20000
-#camera.awb_mode = 'auto'
+camera.shutter_speed = 6000
+camera.awb_mode = 'auto'
 #camera.meter_mode = 'spot'
 #camera.shutter_speed = 20000
 #camera.shutter_speed = camera.exposure_speed
-camera.contrast = 90
+camera.contrast = 50
 camera.brightness = 12
 
-while(max(leds)<1024):
-	leds = [a+10 for a in leds]
+for dutycyle in range(10,1000,50):
+	leds = [int(a*dutycyle) for a in ledstrip]
 
 	for i in range(len(leds)):
 		#print 'Setting LED ',i+1,' to ', leds[i]
@@ -53,7 +53,7 @@ while(max(leds)<1024):
 	imgpath = ','.join(ledstr)
 	
 	print '[', imgpath, ']'
-	#camera.capture(imgpath+'.jpg')
+	camera.capture(imgpath+'.jpg')
 	time.sleep(1)
 	ledsoff()
 
