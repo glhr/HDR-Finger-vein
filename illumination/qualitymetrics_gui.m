@@ -128,4 +128,26 @@ imhist(img2);
 
 data(:,1) = qualitymetrics(img1);
 data(:,2) = qualitymetrics(img2);
-set(handles.comparisontable, 'Data', data);
+
+%# convert matrix of numbers to cell array of strings (right aligned)
+XX = reshape(strtrim(cellstr(num2str(data(:)))), size(data));
+
+%# find cells matching condition
+idx = ( data(:,1) > data(:,2) );
+
+%# use HTML to style these cells
+XX(idx,1) = strcat(...
+    '<html><span style="color: #FF0000; font-weight: bold;">', ...
+    XX(idx,1), ...
+    '</span></html>');
+
+%# find cells matching condition
+idx = ( data(:,2) > data(:,1) );
+
+%# use HTML to style these cells
+XX(idx,2) = strcat(...
+    '<html><span style="color: #FF0000; font-weight: bold;">', ...
+    XX(idx,2), ...
+    '</span></html>');
+
+set(handles.comparisontable, 'Data', XX);
