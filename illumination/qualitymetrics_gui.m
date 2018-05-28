@@ -22,7 +22,7 @@ function varargout = qualitymetrics_gui(varargin)
 
 % Edit the above text to modify the response to help qualitymetrics_gui
 
-% Last Modified by GUIDE v2.5 28-May-2018 14:40:50
+% Last Modified by GUIDE v2.5 28-May-2018 23:00:47
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,21 +68,29 @@ guidata(hObject, handles);
 % uiwait(handles.figure1);
 
 function initimages()
-    global path1 path2 img1 img2 img1_cropped img2_cropped img1_wlim img1_hlim
+    global path1 path2 img1 img2 img1_cropped img2_cropped img1_wlim img1_hlim img2_wlim img2_hlim
 
     img1 = imread(path1);
     img2 = imread(path2);
     img1_cropped = img1;
     img2_cropped = img2;
-    [h, w] = size(img1);
-    img1_wlim = [1 w];
-    img1_hlim = [1 h];
+    [h1, w1] = size(img1);
+    [h2, w2] = size(img1);
+    img1_wlim = [1 w1];
+    img1_hlim = [1 h1];
+    img2_wlim = [1 w2];
+    img2_hlim = [1 h2];
 
 function initsliders(handles)
     set(handles.slider1_htop,'Value',1);
     set(handles.slider1_hbottom,'Value',0);
     set(handles.slider1_wleft,'Value',0);
     set(handles.slider1_wright,'Value',1);
+    
+    set(handles.slider2_htop,'Value',1);
+    set(handles.slider2_hbottom,'Value',0);
+    set(handles.slider2_wleft,'Value',0);
+    set(handles.slider2_wright,'Value',1);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = qualitymetrics_gui_OutputFcn(hObject, eventdata, handles) 
@@ -285,6 +293,132 @@ updategraphs(handles);
 % --- Executes during object creation, after setting all properties.
 function slider1_wleft_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to slider1_wleft (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function slider2_htop_Callback(hObject, eventdata, handles)
+global img2 img2_cropped img2_wlim img2_hlim
+% hObject    handle to slider2_htop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+[h w] = size(img2);
+val = 1 - get(handles.slider2_htop,'Value');
+index = round(val*h/2);
+if(index<1)
+    index = 1;
+end
+img2_hlim(1) = index;
+img2_cropped = imgcrop(img2,img2_hlim,img2_wlim);
+updategraphs(handles);
+
+% --- Executes during object creation, after setting all properties.
+function slider2_htop_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider2_htop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function slider2_hbottom_Callback(hObject, eventdata, handles)
+global img2 img2_cropped img2_wlim img2_hlim
+% hObject    handle to slider1_hbottom (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+[h w] = size(img2);
+val = 1 - get(handles.slider2_hbottom,'Value');
+index = round(h/2 + val*h/2);
+if(index<1)
+    index = 1;
+end
+img2_hlim(2) = index;
+img2_cropped = imgcrop(img2,img2_hlim,img2_wlim);
+updategraphs(handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function slider2_hbottom_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider2_hbottom (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function slider2_wleft_Callback(hObject, eventdata, handles)
+global img2 img2_cropped img2_wlim img2_hlim
+% hObject    handle to slider2_wleft (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+[h w] = size(img2);
+val = get(handles.slider2_wleft,'Value');
+index = round(val*w/2);
+if(index<1)
+    index = 1;
+end
+img2_wlim(1) = index;
+img2_cropped = imgcrop(img2,img2_hlim,img2_wlim);
+updategraphs(handles);
+
+% --- Executes during object creation, after setting all properties.
+function slider2_wleft_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider2_wleft (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function slider2_wright_Callback(hObject, eventdata, handles)
+global img2 img2_cropped img2_wlim img2_hlim
+% hObject    handle to slider1_wright (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+[h w] = size(img2);
+val = get(handles.slider2_wright,'Value');
+index = round(w/2 + val*w/2);
+if(index<1)
+    index = 1;
+end
+img2_wlim(2) = index;
+img2_cropped = imgcrop(img2,img2_hlim,img2_wlim);
+updategraphs(handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function slider2_wright_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider2_wright (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
