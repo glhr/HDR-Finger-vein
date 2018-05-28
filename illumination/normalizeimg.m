@@ -1,4 +1,4 @@
-path = 'img_evaltests/dataset2/segment (6).png';
+path = 'img_evaltests/dataset1/segment (6).png';
 resizeimg(path);
 
 function output = resizeimg(imgpath)
