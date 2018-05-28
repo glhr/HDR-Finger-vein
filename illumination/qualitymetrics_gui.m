@@ -116,6 +116,8 @@ if isequal(file,0)
 else
    path2 = fullfile(path,file)
    disp(['User selected ', path2]);
+   initimages();
+   initsliders(handles);
    updategraphs(handles);
 end
 
