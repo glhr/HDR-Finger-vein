@@ -23,7 +23,7 @@ def ledsoff():
 ledsoff()
 
 while(1):
-	for dutycyle in range(0,int(500/(max(ledstrip))),5):
+	for dutycyle in range(0,int(1000/(max(ledstrip))),100):
 		leds = [int(a*dutycyle) for a in ledstrip]
 
 		for i in range(len(leds)):
