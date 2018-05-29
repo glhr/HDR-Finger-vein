@@ -13,7 +13,7 @@ DEVICE_ADDRESS = 0x04      #7 bit address (will be left shifted to add the read 
 
 time.sleep(1)
 
-ledstrip = [0.5, 0, 0.5, 0, 0.5, 0, 0.5, 0]
+ledstrip = [0.5, 0, 0.3, 0, 0.8, 0, 0.3, 0]
 
 def ledsoff():
 	bus.write_i2c_block_data(DEVICE_ADDRESS, 16, [0, 0]) #turn off all the LEDs

@@ -17,7 +17,7 @@ camera.start_preview()
 camera.preview.fullscreen = False
 camera.preview.window = (800,0,800,600)
 camera.exposure_mode = 'off'
-camera.shutter_speed = 600000
+camera.shutter_speed = 1000000
 camera.iso = 100
 camera.awb_mode = 'auto'
 camera.saturation = -100
@@ -27,7 +27,9 @@ camera.zoom = (0.0, 0.0, 1.0, 1.0)
 #camera.contrast = 30
 #camera.brightness = 12
 time.sleep(1200000)
-#camera.capture('cam.jpg')
+#time.sleep(5)
+#camera.capture('test.raw',format='rgb',bayer=True)
+#camera.capture('test.png',format='png')
 # camera.capture(newfolder+'/cam2.'+str(i)+'.jpg')
 camera.stop_preview()
 
