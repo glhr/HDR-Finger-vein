@@ -13,7 +13,7 @@ DEVICE_ADDRESS = 0x04      #7 bit address (will be left shifted to add the read 
 
 time.sleep(1)
 
-ledstrip = [0.5, 0, 0.3, 0, 0.8, 0, 0.3, 0]
+ledstrip = [0.5, 0, 0.3, 0, 1, 0, 0.5, 0]
 
 def ledsoff():
 	bus.write_i2c_block_data(DEVICE_ADDRESS, 16, [0, 0]) #turn off all the LEDs
@@ -53,6 +53,7 @@ if not os.path.exists(folder):
 
 lines =[
 "--------------SETUP--------------",
+"illumination pattern: "+str(ledstrip),
 "cap/dark housing: "+cap,
 "IR filter: "+irfilter,
 "finger window: "+fingerwindow,
@@ -64,6 +65,8 @@ lines =[
 "shutter speed: "+str(camera.shutter_speed),
 "ISO: "+str(camera.iso),
 "AWB mode: "+camera.awb_mode,
+"contrast: " + str(camera.contrast),
+"brightness: " + str(camera.brightness),
 "saturation: "+str(camera.saturation),
 "zoom: "+str(camera.zoom)
 ] 
@@ -72,24 +75,30 @@ file = open(folder+"/"+folder+"-info.txt","w+")
 file.writelines("%s\n" % l for l in lines)
 file.close()
 
-for dutycyle in range(0,int(1000/(max(ledstrip))),50):
+for dutycyle in range(0,int(2000/(max(ledstrip))),50):
 	leds = [int(a*dutycyle) for a in ledstrip]
 
 	for i in range(len(leds)):
 		#print 'Setting LED ',i+1,' to ', leds[i]
 		pwm = leds[i]
+		if(pwm>1024):
+			pwm = 1024;
 		byte1 = pwm >> 8
 		byte2 = pwm & 255
 		ledout_bytes = [byte1, byte2]
 		bus.write_i2c_block_data(DEVICE_ADDRESS, i+8, ledout_bytes)
 		time.sleep(0.01)
-		
-	ledstr = [str(a) for a in leds]
-	imgpath = ','.join(ledstr)
 	
-	print '[', imgpath, ']'
-	timestr = time.strftime("%m-%d_%H-%M-%S")
-	camera.capture(folder+"/"+timestr+'['+imgpath+'].png')
+	if(max(leds)>0):
+		ledstr = [str(a) for a in leds]
+		imgpath = ','.join(ledstr)
+		
+		print '[', imgpath, ']'
+		timestr = time.strftime("%m-%d_%H-%M-%S")
+		camera.capture(folder+"/"+timestr+'['+imgpath+'].png')
+	
+	if(max(leds)>=1024):
+		break;
 	#time.sleep(0.05)
 	#
 
