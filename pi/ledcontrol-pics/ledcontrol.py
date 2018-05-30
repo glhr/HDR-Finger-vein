@@ -24,8 +24,8 @@ ledsoff()
 ## SETUP CAMERA
 
 camera =  PiCamera()
-#camera.resolution = (800,600)
-camera.resolution = (1920,1080)
+camera.resolution = (800,600)
+#camera.resolution = (1920,1080)
 if(enable_preview):
 	camera.start_preview()
 	camera.preview.fullscreen = False
@@ -33,7 +33,6 @@ if(enable_preview):
 camera.exposure_mode = 'off'
 camera.shutter_speed = 1000000
 camera.iso = 100
-camera.shutter_speed = 1000000
 camera.awb_mode = 'auto'
 camera.saturation = -100
 camera.zoom = (0.0, 0.0, 1.0, 1.0) 
@@ -43,17 +42,33 @@ camera.zoom = (0.0, 0.0, 1.0, 1.0)
 #camera.contrast = 50
 #camera.brightness = 12
 
+cap = "no"
+irfilter = "no"
+fingerwindow = "no"
+extraledstrips = "left & right"
+
 folder = time.strftime("%m-%d_%H-%M-%S")
 if not os.path.exists(folder):
     os.makedirs(folder)
 
 lines =[
+"--------------SETUP--------------",
+"cap/dark housing: "+cap,
+"IR filter: "+irfilter,
+"finger window: "+fingerwindow,
+"extra ledstrips: "+extraledstrips,
+"\n",
+"---------CAMERA SETTINGS---------",
+"resolution: "+str(camera.resolution),
 "exposure mode: "+camera.exposure_mode,
 "shutter speed: "+str(camera.shutter_speed),
 "ISO: "+str(camera.iso),
-"AWB mode: "+camera.awb_mode] 
+"AWB mode: "+camera.awb_mode,
+"saturation: "+str(camera.saturation),
+"zoom: "+str(camera.zoom)
+] 
 
-file = open(folder+"/"+folder+"-info","w+")
+file = open(folder+"/"+folder+"-info.txt","w+")
 file.writelines("%s\n" % l for l in lines)
 file.close()
 
