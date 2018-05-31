@@ -5,6 +5,7 @@ import smbus
 import time
 
 enable_preview = False
+enable_capture = True
 
 ## SETUP LEDS
 bus = smbus.SMBus(1)    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
@@ -13,8 +14,9 @@ DEVICE_ADDRESS = 0x04      #7 bit address (will be left shifted to add the read 
 
 time.sleep(1)
 
-ledstrip = [0.5, 0, 0.3, 0, 1, 0, 0.5, 0]
-
+#[base of finger .... end of finger]
+ledstrip = [1, 0, 0, 0, 1, 0, 0, 0.3]
+ 
 def ledsoff():
 	bus.write_i2c_block_data(DEVICE_ADDRESS, 16, [0, 0]) #turn off all the LEDs
 	return
@@ -47,35 +49,43 @@ irfilter = "no"
 fingerwindow = "no"
 extraledstrips = "left & right"
 
-folder = time.strftime("%m-%d_%H-%M-%S")
-if not os.path.exists(folder):
-    os.makedirs(folder)
+if(enable_capture):
+	folder = time.strftime("%m-%d_%H-%M-%S")
+	if not os.path.exists(folder):
+	    os.makedirs(folder)
 
-lines =[
-"--------------SETUP--------------",
-"illumination pattern: "+str(ledstrip),
-"cap/dark housing: "+cap,
-"IR filter: "+irfilter,
-"finger window: "+fingerwindow,
-"extra ledstrips: "+extraledstrips,
-"\n",
-"---------CAMERA SETTINGS---------",
-"resolution: "+str(camera.resolution),
-"exposure mode: "+camera.exposure_mode,
-"shutter speed: "+str(camera.shutter_speed),
-"ISO: "+str(camera.iso),
-"AWB mode: "+camera.awb_mode,
-"contrast: " + str(camera.contrast),
-"brightness: " + str(camera.brightness),
-"saturation: "+str(camera.saturation),
-"zoom: "+str(camera.zoom)
-] 
+	lines =[
+	"--------------SETUP--------------",
+	"illumination pattern: "+str(ledstrip),
+	"cap/dark housing: "+cap,
+	"IR filter: "+irfilter,
+	"finger window: "+fingerwindow,
+	"extra ledstrips: "+extraledstrips,
+	"\n",
+	"---------CAMERA SETTINGS---------",
+	"resolution: "+str(camera.resolution),
+	"exposure mode: "+camera.exposure_mode,
+	"shutter speed: "+str(camera.shutter_speed),
+	"ISO: "+str(camera.iso),
+	"AWB mode: "+camera.awb_mode,
+	"contrast: " + str(camera.contrast),
+	"brightness: " + str(camera.brightness),
+	"saturation: "+str(camera.saturation),
+	"zoom: "+str(camera.zoom)
+	] 
 
-file = open(folder+"/"+folder+"-info.txt","w+")
-file.writelines("%s\n" % l for l in lines)
-file.close()
+	file = open(folder+"/"+folder+"-info.txt","w+")
+	file.writelines("%s\n" % l for l in lines)
+	file.close()
+	
+if(enable_capture):
+	pwmstep = 50
+	pwmmax = 1024
+else:
+	pwmstep = 10
+	pwmmax = 300
 
-for dutycyle in range(0,int(2000/(max(ledstrip))),50):
+for dutycyle in range(0,int(2000/(max(ledstrip))),pwmstep):
 	leds = [int(a*dutycyle) for a in ledstrip]
 
 	for i in range(len(leds)):
@@ -94,12 +104,15 @@ for dutycyle in range(0,int(2000/(max(ledstrip))),50):
 		imgpath = ','.join(ledstr)
 		
 		print '[', imgpath, ']'
-		timestr = time.strftime("%m-%d_%H-%M-%S")
-		camera.capture(folder+"/"+timestr+'['+imgpath+'].png')
+		if(enable_capture):
+			timestr = time.strftime("%m-%d_%H-%M-%S")
+			camera.capture(folder+"/"+timestr+'['+imgpath+'].png')
 	
-	if(max(leds)>=1024):
+	if(max(leds)>=pwmmax):
 		break;
-	#time.sleep(0.05)
+
+	if((not enable_capture) and (enable_preview)):
+		time.sleep(1)
 	#
 
 	# camera.capture(newfolder+'/cam2.'+str(i)+'.jpg')
