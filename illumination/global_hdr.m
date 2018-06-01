@@ -66,53 +66,11 @@ end
 hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
 %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized);
 %rgb = localtonemap(hdr,'EnhanceContrast', 1); 
-%rgb = tonemap(hdr);
-rgb = uint8(255*mat2gray(hdr));
+rgb = tonemap(hdr);
+%rgb = uint8(255*mat2gray(hdr));
 figure; 
 subplot(2,1,1),imshow(rgb);
-    
-%% compare with segmented approach
-% for i = 1:5 
-%       path = cell2mat(files(i)); 
-%       img = imread(path); 
-% 
-%       expTimes{i} = zeros(size(img));
-%       expNormalized{i} = zeros(size(img));
-%       
-%       segwidth = 1;
-%       segheight = 75;
-%       for j = 1:segwidth:img_w
-%           for k = 1:segheight:img_h
-%           if(j>=img_w-segwidth)
-%               if(k>=img_h-segheight)
-%                   block = img(k:img_h,j:img_w);
-%                   expTimes{i}(k:img_h,j:img_w)= mean(block(:)); 
-%                   %expNormalized{i}(k:75,j:302) = expTimes{i}(k:75,j:302)./double(expTimes{i}(1,1));
-%               else
-%                   block = img(k:k+segheight,j:img_w);
-%                   expTimes{i}(k:k+segheight,j:img_w)= mean(block(:)); 
-%                   %expNormalized{i}(k:k+segheight,j:302) = expTimes{i}(k:k+segheight,j:302)./double(expTimes{i}(1,1));
-%               end
-%           else
-%               if(k>=img_h-segheight)
-%                 block = img(k:img_h,j:j+segwidth);
-%                 expTimes{i}(k:img_h,j:j+segwidth)= mean(block(:)); 
-%                 %expNormalized{i}(k:75,j:j+segwidth) = expTimes{i}(k:75,j:j+segwidth)./double(expTimes{i}(1,1));
-%               else
-%                 block = img(k:k+segheight,j:j+segwidth);
-%                 expTimes{i}(k:k+segheight,j:j+segwidth)= mean(block(:)); 
-%                 %expNormalized{i}(k:k+segheight,j:j+segwidth) = expTimes{i}(k:k+segheight,j:j+segwidth)./double(expTimes{i}(1,1));
-%               end
-%           end
-%           end
-%       end
-%       
-%       expNormalized{i} = expTimes{i}./double(expTimes{i}(1));
-% end 
-    
-%hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-%rgb = tonemap(hdr);  
-%subplot(3,1,2),imshow(rgb);
+imwrite(rgb,'img_evaltests/dataset5/hdr_global.png');
 
 %% compare with moving average approach
 
@@ -128,7 +86,9 @@ end
 
 hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
 rgb = tonemap(hdr);  
+%rgb = uint8(255*mat2gray(hdr));
 %subplot(2,1,2),imshow(rgb);
+imwrite(rgb,'img_evaltests/dataset5/hdr_75,1.png');
 
 %% compare with moving average approach
 
@@ -143,11 +103,14 @@ for i = 1:numel(files)
 end 
 
 hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-%rgb = tonemap(hdr);  
-rgb = uint8(255*mat2gray(hdr));
+rgb = tonemap(hdr);  
+%rgb = uint8(255*mat2gray(hdr));
 subplot(2,1,2),imshow(rgb);
+imwrite(rgb,'img_evaltests/dataset5/hdr_[1 5].png');
 
 figure;
 path = cell2mat(files(1)); 
 img = imread(path); 
-imshow(imadjust(img));
+adjust = imadjust(img);
+imshow(adjust);
+imwrite(adjust,'img_evaltests/dataset5/imadjust_result.png');
