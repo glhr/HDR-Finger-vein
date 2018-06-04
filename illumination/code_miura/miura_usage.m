@@ -32,8 +32,8 @@ v_repeated_line_bin = v_repeated_line > md;
 %% Match
 cw = 80; ch=30;
 % Note that the match score is between 0 and 0.5
-score = miura_match(double(v_repeated_line_bin), double(v_max_curvature_bin), cw, ch);
-fprintf('Match score: %6.4f %%\n', score);
+%score = miura_match(double(v_repeated_line_bin), double(v_max_curvature_bin), cw, ch);
+%fprintf('Match score: %6.4f %%\n', score);
 
 %% Visualise
 % Overlay the extracted veins on the original image
