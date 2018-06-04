@@ -16,7 +16,7 @@ metafile = {'img_evaltests/dataset4/segment4meta.png'};
 files = {
         'img_evaltests/dataset5/segment (1).png_cropped.png', ...
         'img_evaltests/dataset5/segment (5).png_cropped.png', ...
-%         'img_evaltests/dataset5/segment (10).png_cropped.png',...  
+         'img_evaltests/dataset5/segment (10).png_cropped.png',...  
 %         'img_evaltests/dataset5/segment (15).png_cropped.png',...
          %'img_evaltests/dataset1/segment_cropped (5).png'...
          }; 
@@ -34,6 +34,10 @@ montage(files);
 % figure;
  path = cell2mat(files(1)); 
  img1 = imread(path);
+  path = cell2mat(files(2)); 
+ img2 = imread(path);
+  path = cell2mat(files(3)); 
+ img3 = imread(path);
 % [Gmag, Gdir] = imgradient(img1,'prewitt');
 % Gmag = uint8(255*mat2gray(Gmag));
 % Gdir = uint8(255*mat2gray(Gdir));
@@ -62,47 +66,58 @@ for i = 1:numel(files)
   %expTimes(i) = mean(img(:)); 
   %expTimes{i} = img;
   expTimes{i}=zeros(size(img));
-  weight = mat2gray(img1);
-  weightneg = mat2gray(imcomplement(img1));
+  weight = double(img1);
+  weightneg = double(imcomplement(img1));
   if(i == 1)
-    expTimes{i}= mean(img(:)).*weight; 
+    %expTimes{i}= mean(img(:)).*weight; 
+    expTimes{i}= weight.^2; 
   else
-    expTimes{i}= mean(img(:)).*weightneg; 
+    %expTimes{i}= mean(img(:)).*weightneg; 
+    expTimes{i}=  weightneg.^2; 
   end
-  expNormalized{i} = expTimes{i}./expTimes{i}(1);
+  expNormalized{i} = expTimes{i}./expTimes{1}(1);
+end 
+
+%makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
+rgb = hdr_custom(img1,images,expNormalized);
+figure; 
+subplot(3,1,1),imshow(rgb);
+%imwrite(rgb,'img_evaltests/dataset5/hdrimproved.png');
+
+%% single scalar relative exposure value per image 
+
+for i = 1:numel(files) 
+    path = cell2mat(files(i)); 
+    img = imread(path); 
+    images{i} = img;
+  %expTimes(i) = mean(img(:)); 
+  %expTimes{i} = img;
+  expTimes{i}=zeros(size(img));
+  weight = double(img1);
+  weightneg = double(imcomplement(img1));
+  if(i == 1)
+    %expTimes{i}= mean(img(:)).*weight; 
+    expTimes{i}= weight; 
+  else
+    %expTimes{i}= mean(img(:)).*weightneg; 
+    expTimes{i}=  weightneg; 
+  end
+  expNormalized{i} = expTimes{i}./expTimes{1}(1);
 end 
 
 %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-hdr = (double(images{1}).*expTimes{1})+(double(images{2}).*expTimes{2});
-hdr(hdr == Inf) = NaN;
-hdr(isnan(hdr)) = nanmax(hdr(:));
-%rgb = tonemap(hdr);
-rgb = uint8(255*mat2gray(hdr));
-figure; 
-subplot(3,1,1),imshow(rgb);
+rgb = hdr_custom(img1,images,expNormalized);
+subplot(3,1,2),imshow(rgb);
 imwrite(rgb,'img_evaltests/dataset5/hdrimproved.png');
-% 
-% %% single scalar relative exposure value per image 
-% 
-% for i = 1:numel(files) 
-%     path = cell2mat(files(i)); 
-%     img = imread(path); 
-%     images{i} = img;
-%   %expTimes(i) = mean(img(:)); 
-%   %expTimes{i} = img;
-%   expTimes{i}=zeros(size(img));
-%   expTimes{i}(:)= mean(img(:)); 
-%   expNormalized{i} = expTimes{i}./expTimes{i}(1);
-% end 
-% 
-% hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-% %rgb = tonemap(hdr);
-% rgb = uint8(255*mat2gray(hdr));
-% figure; 
-% subplot(3,1,1),imshow(rgb);
-% imwrite(rgb,'img_evaltests/dataset5/hdrimproved_2.png');
 
-
+%% compare with multiplying img1 with itself
+img116 = uint16(img1);
+img216 = uint16(img2);
+hdr2 = immultiply(img216,img116);
+%rgb2 = uint16(255*mat2gray(hdr2));
+subplot(3,1,3),imshow(hdr2);
+%imwrite(hdr2,'img_evaltests/dataset5/hdrimproved.png');
+ 
 
 function [output_weight, output_thresh] = subtractillumination(img,plot)
     global background_filter_radius suppress_detail_thresh detailweight_filter_radius
@@ -143,4 +158,15 @@ function [output_weight, output_thresh] = subtractillumination(img,plot)
         subplot(2,1,2),imshow(output_weight,[0 255]);
     end
     
+end
+
+function output = hdr_custom(img,images,expNormalized)
+    hdr = zeros(size(img));
+    for i = 1:numel(images) 
+        hdr = hdr+(double(images{1}).*expNormalized{1});
+    end
+    hdr(hdr == Inf) = NaN;
+    hdr(isnan(hdr)) = nanmax(hdr(:));
+    %rgb = tonemap(hdr);
+    output = uint8(255*mat2gray(hdr));
 end
