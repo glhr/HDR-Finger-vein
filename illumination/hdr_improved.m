@@ -17,7 +17,7 @@ files = {
         'img_evaltests/dataset5/segment (1).png_cropped.png', ...
         'img_evaltests/dataset5/segment (5).png_cropped.png', ...
          'img_evaltests/dataset5/segment (10).png_cropped.png',...  
-%         'img_evaltests/dataset5/segment (15).png_cropped.png',...
+         'img_evaltests/dataset5/segment (15).png_cropped.png',...
          %'img_evaltests/dataset1/segment_cropped (5).png'...
          }; 
 
@@ -27,17 +27,11 @@ expTimes = cell(1,numel(files));
 expNormalized = cell(1,numel(files));
 images = cell(1,numel(files));
 
-figure;
-montage(files);
+% figure;
+% montage(files);
 
 %% gradient
-% figure;
- path = cell2mat(files(1)); 
- img1 = imread(path);
-  path = cell2mat(files(2)); 
- img2 = imread(path);
-  path = cell2mat(files(3)); 
- img3 = imread(path);
+ figure;
 % [Gmag, Gdir] = imgradient(img1,'prewitt');
 % Gmag = uint8(255*mat2gray(Gmag));
 % Gdir = uint8(255*mat2gray(Gdir));
@@ -54,20 +48,25 @@ montage(files);
 % subplot(2,2,3),imshow(Gmag);
 % subplot(2,2,4),imshow(Gdir);
 
+for i = 1:numel(files) 
+    path = cell2mat(files(i)); 
+    img = imread(path); 
+    images{i} = img;
+    subplot(numel(files),2,i*2-1),imshow(images{i});
+    subplot(numel(files),2,i*2),imhist(images{i});
+end
+
 %% subtract illumination
 %[veins_weight, veins_thresh] = subtractillumination(img1,2);
 
 %% single scalar relative exposure value per image 
 
-for i = 1:numel(files) 
-    path = cell2mat(files(i)); 
-    img = imread(path); 
-    images{i} = img;
+for i = 1:numel(images) 
   %expTimes(i) = mean(img(:)); 
   %expTimes{i} = img;
   expTimes{i}=zeros(size(img));
-  weight = double(img1);
-  weightneg = double(imcomplement(img1));
+  weight = double(images{i});
+  weightneg = double(imcomplement(images{i}));
   if(i == 1)
     %expTimes{i}= mean(img(:)).*weight; 
     expTimes{i}= weight.^2; 
@@ -79,26 +78,30 @@ for i = 1:numel(files)
 end 
 
 %makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-rgb = hdr_custom(img1,images,expNormalized);
+rgb = hdr_custom(images{1},images,expNormalized);
 figure; 
 subplot(3,1,1),imshow(rgb);
 %imwrite(rgb,'img_evaltests/dataset5/hdrimproved.png');
 
+%% get mean gray value of images
+for i = 1:numel(images) 
+  %expTimes(i) = mean(img(:)); 
+  %expTimes{i} = img;
+  gray_avg{i} = mean(img(:));
+end 
+
 %% single scalar relative exposure value per image 
 
-for i = 1:numel(files) 
-    path = cell2mat(files(i)); 
-    img = imread(path); 
-    images{i} = img;
+for i = 1:numel(images) 
   %expTimes(i) = mean(img(:)); 
   %expTimes{i} = img;
   expTimes{i}=zeros(size(img));
-  weight = double(img1);
-  weightneg = double(imcomplement(img1));
+  weight = double(images{1});
+  weightneg = double(imcomplement(images{1}));
   if(i == 1)
     %expTimes{i}= mean(img(:)).*weight; 
     expTimes{i}= weight; 
-  else
+  elseif(i == 2)
     %expTimes{i}= mean(img(:)).*weightneg; 
     expTimes{i}=  weightneg; 
   end
@@ -106,18 +109,17 @@ for i = 1:numel(files)
 end 
 
 %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-rgb = hdr_custom(img1,images,expNormalized);
+rgb = hdr_custom(images{1},images,expNormalized);
 subplot(3,1,2),imshow(rgb);
 imwrite(rgb,'img_evaltests/dataset5/hdrimproved.png');
 
 %% compare with multiplying img1 with itself
-img116 = uint16(img1);
-img216 = uint16(img2);
+img116 = uint16(images{1});
+img216 = uint16(images{2});
 hdr2 = immultiply(img216,img116);
 %rgb2 = uint16(255*mat2gray(hdr2));
 subplot(3,1,3),imshow(hdr2);
 %imwrite(hdr2,'img_evaltests/dataset5/hdrimproved.png');
- 
 
 function [output_weight, output_thresh] = subtractillumination(img,plot)
     global background_filter_radius suppress_detail_thresh detailweight_filter_radius
@@ -163,7 +165,7 @@ end
 function output = hdr_custom(img,images,expNormalized)
     hdr = zeros(size(img));
     for i = 1:numel(images) 
-        hdr = hdr+(double(images{1}).*expNormalized{1});
+        hdr = hdr+(double(images{i}).*expNormalized{i});
     end
     hdr(hdr == Inf) = NaN;
     hdr(isnan(hdr)) = nanmax(hdr(:));
