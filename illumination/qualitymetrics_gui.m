@@ -69,7 +69,7 @@ guidata(hObject, handles);
 
 function initimages()
     global path1 path2 img1 img2 img1_cropped img2_cropped img1_wlim img1_hlim img2_wlim img2_hlim
-    global sigma
+    global sigma r w iter
 
     img1 = imread(path1);
     img2 = imread(path2);
@@ -84,8 +84,12 @@ function initimages()
     
     % recognition
     sigma = 2;
+    r = 6;
+    w = 9;
+    iter = 1000;
 
 function initsliders(handles)
+    global sigma r w iter
     set(handles.slider1_htop,'Value',1);
     set(handles.slider1_hbottom,'Value',0);
     set(handles.slider1_wleft,'Value',0);
@@ -97,10 +101,29 @@ function initsliders(handles)
     set(handles.slider2_wright,'Value',1);
     
     %sigma
-    set(handles.sigma_txt,'Value',2);    
+    set(handles.sigma_txt,'Value',sigma);    
     sigma = get(handles.sigma_slider,'Value');
     val = strcat('sigma: ',num2str(sigma));
     set(handles.sigma_txt,'String',val);
+    
+    %iter
+    set(handles.iter_txt,'Value',iter);    
+    iter = get(handles.iter_slider,'Value');
+    val = strcat('iterations: ',num2str(iter));
+    set(handles.iter_txt,'String',val);
+    
+    %r
+    set(handles.r_txt,'Value',r);    
+    r = get(handles.r_slider,'Value');
+    val = strcat('r: ',num2str(r));
+    set(handles.r_txt,'String',val);
+    
+    %r
+    set(handles.w_txt,'Value',w);    
+    w = get(handles.w_slider,'Value');
+    val = strcat('w: ',num2str(w));
+    set(handles.w_txt,'String',val);
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = qualitymetrics_gui_OutputFcn(hObject, eventdata, handles) 
@@ -507,13 +530,16 @@ end
 
 % --- Executes on slider movement.
 function iter_slider_Callback(hObject, eventdata, handles)
+global iter
 % hObject    handle to iter_slider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+iter = round(get(handles.iter_slider,'Value'));
+val = strcat('iter: ',num2str(iter));
+set(handles.iter_txt,'String',val);
 
 % --- Executes during object creation, after setting all properties.
 function iter_slider_CreateFcn(hObject, eventdata, handles)
@@ -529,13 +555,16 @@ end
 
 % --- Executes on slider movement.
 function r_slider_Callback(hObject, eventdata, handles)
+global r
 % hObject    handle to r_slider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+r = get(handles.r_slider,'Value');
+val = strcat('r: ',num2str(r));
+set(handles.r_txt,'String',val);
 
 % --- Executes during object creation, after setting all properties.
 function r_slider_CreateFcn(hObject, eventdata, handles)
@@ -551,13 +580,16 @@ end
 
 % --- Executes on slider movement.
 function w_slider_Callback(hObject, eventdata, handles)
+global w
 % hObject    handle to w_slider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+w = get(handles.w_slider,'Value');
+val = strcat('w: ',num2str(w));
+set(handles.w_txt,'String',val);
 
 % --- Executes during object creation, after setting all properties.
 function w_slider_CreateFcn(hObject, eventdata, handles)
