@@ -465,16 +465,16 @@ end
 
 % --- Executes on button press in recognition1a.
 function recognition1a_Callback(hObject, eventdata, handles)
-global path1 path2 sigma
+global path1 path2 sigma iter r w
 % hObject    handle to recognition1a (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 addpath('code_miura');
-[img1, maxcurve1] = miura_usage(path1,4000,6,9,sigma,1);
+[img1, maxcurve1] = miura_usage(path2,iter,r,w,sigma,1);
 axes(handles.axes3);
 imshow(maxcurve1);
 
-[img2, maxcurve2] = miura_usage(path2,4000,6,9,sigma,1);
+[img2, maxcurve2] = miura_usage(path2,iter,r,w,sigma,1);
 axes(handles.axes4);
 imshow(maxcurve2);
 
@@ -488,17 +488,17 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in recognition2a.
 function recognition2a_Callback(hObject, eventdata, handles)
-global path1 path2
+global path1 path2 iter r w sigma
 % hObject    handle to recognition2a (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 addpath('code_miura');
-[img1, maxcurve1, repeatedline1] = miura_usage(path1,4000,6,9);
-axes(handles.axes1);
+[img1, repeatedline1] = miura_usage(path1,iter,r,w,sigma,2);
+axes(handles.axes3);
 imshow(repeatedline1);
 
-[img2, maxcurve2, repeatedline2] = miura_usage(path2,4000,6,9);
-axes(handles.axes2);
+[img2, repeatedline2] = miura_usage(path2,iter,r,w,sigma,2);
+axes(handles.axes4);
 imshow(repeatedline2);
 
 
@@ -562,7 +562,7 @@ global r
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-r = get(handles.r_slider,'Value');
+r = round(get(handles.r_slider,'Value'));
 val = strcat('r: ',num2str(r));
 set(handles.r_txt,'String',val);
 
@@ -587,7 +587,10 @@ global w
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-w = get(handles.w_slider,'Value');
+w = round(get(handles.w_slider,'Value'));
+if(mod(w,2) == 0)
+    w = w+1;
+end
 val = strcat('w: ',num2str(w));
 set(handles.w_txt,'String',val);
 
