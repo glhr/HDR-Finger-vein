@@ -22,7 +22,7 @@ function varargout = qualitymetrics_gui(varargin)
 
 % Edit the above text to modify the response to help qualitymetrics_gui
 
-% Last Modified by GUIDE v2.5 28-May-2018 23:00:47
+% Last Modified by GUIDE v2.5 05-Jun-2018 11:16:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -421,6 +421,67 @@ updategraphs(handles);
 % --- Executes during object creation, after setting all properties.
 function slider2_wright_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to slider2_wright (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in recognition1a.
+function recognition1a_Callback(hObject, eventdata, handles)
+global path1 path2
+% hObject    handle to recognition1a (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+addpath('code_miura');
+[img1, maxcurve1, repeatedline1] = miura_usage(path1,4000,6,9);
+axes(handles.axes1);
+imshow(maxcurve1);
+
+[img2, maxcurve2, repeatedline2] = miura_usage(path2,4000,6,9);
+axes(handles.axes2);
+imshow(maxcurve2);
+
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in recognition2a.
+function recognition2a_Callback(hObject, eventdata, handles)
+global path1 path2
+% hObject    handle to recognition2a (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+addpath('code_miura');
+[img1, maxcurve1, repeatedline1] = miura_usage(path1,4000,6,9);
+axes(handles.axes1);
+imshow(repeatedline1);
+
+[img2, maxcurve2, repeatedline2] = miura_usage(path2,4000,6,9);
+axes(handles.axes2);
+imshow(repeatedline2);
+
+
+% --- Executes on slider movement.
+function slider9_Callback(hObject, eventdata, handles)
+% hObject    handle to slider9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function slider9_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
