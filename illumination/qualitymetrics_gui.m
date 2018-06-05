@@ -69,6 +69,7 @@ guidata(hObject, handles);
 
 function initimages()
     global path1 path2 img1 img2 img1_cropped img2_cropped img1_wlim img1_hlim img2_wlim img2_hlim
+    global sigma
 
     img1 = imread(path1);
     img2 = imread(path2);
@@ -80,6 +81,9 @@ function initimages()
     img1_hlim = [1 h1];
     img2_wlim = [1 w2];
     img2_hlim = [1 h2];
+    
+    % recognition
+    sigma = 2;
 
 function initsliders(handles)
     set(handles.slider1_htop,'Value',1);
@@ -432,16 +436,16 @@ end
 
 % --- Executes on button press in recognition1a.
 function recognition1a_Callback(hObject, eventdata, handles)
-global path1 path2
+global path1 path2 sigma
 % hObject    handle to recognition1a (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 addpath('code_miura');
-[img1, maxcurve1, repeatedline1] = miura_usage(path1,4000,6,9);
+[img1, maxcurve1] = miura_usage(path1,4000,6,9,sigma,1);
 axes(handles.axes1);
 imshow(maxcurve1);
 
-[img2, maxcurve2, repeatedline2] = miura_usage(path2,4000,6,9);
+[img2, maxcurve2] = miura_usage(path2,4000,6,9,sigma,1);
 axes(handles.axes2);
 imshow(maxcurve2);
 

@@ -1,6 +1,6 @@
 % Howto use the miura_* scripts.
 
-function [img, overlay_max_curvature, overlay_repeated_line] = miura_usage(img, iterations, r, W)
+function [img, overlay] = miura_usage(img, iterations, r, W, sigma, method)
 
 img = im2double(imread(img)); % Read the image
 %img = imresize(img,0.75);               % Downscale image
@@ -13,41 +13,45 @@ img = im2double(imread(img)); % Read the image
 %fvr = lee_region(img,4,40);    % Get finger region
 fvr = ones(size(img));
 
-%% Extract veins using maximum curvature method
-sigma = 2; % Parameter
-v_max_curvature = miura_max_curvature(img,fvr,sigma);
+if(method == 1)
+    %% Extract veins using maximum curvature method
+    %sigma = 2; % Parameter
+    v_max_curvature = miura_max_curvature(img,fvr,sigma);
+    % Binarise the vein image
+    md = median(v_max_curvature(v_max_curvature>0));
+    v_max_curvature_bin = v_max_curvature > md; 
+    % Overlay the extracted veins on the original image
+    overlay_max_curvature = zeros([size(img) 3]);
+    overlay_max_curvature(:,:,1) = img;
+    overlay_max_curvature(:,:,2) = img + 0.4*v_max_curvature_bin;
+    overlay_max_curvature(:,:,3) = img;
+    overlay = overlay_max_curvature;
 
-% Binarise the vein image
-md = median(v_max_curvature(v_max_curvature>0));
-v_max_curvature_bin = v_max_curvature > md; 
 
-%% Extract veins using repeated line tracking method
-max_iterations = iterations; % Parameters
-v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W);
+else
+    %% Extract veins using repeated line tracking method
+    max_iterations = iterations; % Parameters
+    v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W);
 
-% Binarise the vein image
-md = median(v_repeated_line(v_repeated_line>0));
-v_repeated_line_bin = v_repeated_line > md; 
+    % Binarise the vein image
+    md = median(v_repeated_line(v_repeated_line>0));
+    v_repeated_line_bin = v_repeated_line > md; 
 
-%% Match
-cw = 80; ch=30;
-% Note that the match score is between 0 and 0.5
-%score = miura_match(double(v_repeated_line_bin), double(v_max_curvature_bin), cw, ch);
-%fprintf('Match score: %6.4f %%\n', score);
+    %% Match
+    %cw = 80; ch=30;
+    % Note that the match score is between 0 and 0.5
+    %score = miura_match(double(v_repeated_line_bin), double(v_max_curvature_bin), cw, ch);
+    %fprintf('Match score: %6.4f %%\n', score);
 
-%% Visualise
-% Overlay the extracted veins on the original image
-overlay_max_curvature = zeros([size(img) 3]);
-overlay_max_curvature(:,:,1) = img;
-overlay_max_curvature(:,:,2) = img + 0.4*v_max_curvature_bin;
-overlay_max_curvature(:,:,3) = img;
+    %% Visualise
 
-% Overlay the extracted veins on the original image
-overlay_repeated_line = zeros([size(img) 3]);
-overlay_repeated_line(:,:,1) = img;
-overlay_repeated_line(:,:,2) = img + 0.4*v_repeated_line_bin;
-overlay_repeated_line(:,:,3) = img;
-
+    % Overlay the extracted veins on the original image
+    overlay_repeated_line = zeros([size(img) 3]);
+    overlay_repeated_line(:,:,1) = img;
+    overlay_repeated_line(:,:,2) = img + 0.4*v_repeated_line_bin;
+    overlay_repeated_line(:,:,3) = img;
+    overlay = overlay_repeated_line;
+end
 % figure;
 % subplot(3,2,1)
 %   imshow(img,[])
