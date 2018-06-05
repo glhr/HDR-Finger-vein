@@ -4,15 +4,17 @@ function output = qualitymetrics(img)
     stats = graycoprops(glcm);
     
     
-     output(1) = stats.Contrast;
-     output(2) = contrast(img);
-     output(3) = mean2(img);
-     output(4) = std2(img);
-     output(5) = entropy(img);
-     output(6) = stats.Energy;
-     output(7) = sum(img(:));
+     output(7) = stats.Contrast;
      output(8) = stats.Homogeneity;
-     output(9) = stats.Correlation;
+     output(9) = stats.Energy;
+     output(10) = stats.Correlation;
+     
+     output(1) = contrast(img);
+     output(2) = mean2(img);
+     output(3) = std2(img);
+     output(4) = entropy(img);
+     output(5) = sum(img(:));
+
 
      
 %     output(2) = mean2(img);

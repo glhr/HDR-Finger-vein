@@ -470,14 +470,13 @@ global path1 path2 sigma iter r w
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 addpath('code_miura');
-[img1, maxcurve1] = miura_usage(path2,iter,r,w,sigma,1);
+[img1, maxcurve1] = miura_usage(path1,iter,r,w,sigma,1);
 axes(handles.axes3);
 imshow(maxcurve1);
 
 [img2, maxcurve2] = miura_usage(path2,iter,r,w,sigma,1);
 axes(handles.axes4);
 imshow(maxcurve2);
-
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
