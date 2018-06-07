@@ -92,7 +92,7 @@ end
 validateattributes(filenames,{'cell'},{'nonempty'},mfilename,'files',1);
 meta = getMetaData(filenames{1});
 
-varargin = matlab.images.internal.stringToChar(varargin);
+%varargin = matlab.images.internal.stringToChar(varargin);
 options = parseArgs(meta, varargin{:});
 validateOptions(images, options);
 

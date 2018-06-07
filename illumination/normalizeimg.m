@@ -1,4 +1,4 @@
-for i = 1:21
+for i = 1:23
 %path = strcat('img_evaltests/dataset5/segment (',num2str(i),').png');
 path = strcat('img_evaltests/dataset5/');
 resizeimg(path,i);
