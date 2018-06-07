@@ -1,6 +1,6 @@
 
 function output = qualitymetrics(img)
-    glcm = graycomatrix(img);
+    glcm = graycomatrix(img,'NumLevels',256,'GrayLimits',[],'Symmetric',true);
     stats = graycoprops(glcm);
     
     
