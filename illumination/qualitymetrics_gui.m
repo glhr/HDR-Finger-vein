@@ -52,8 +52,8 @@ global path1 path2
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to qualitymetrics_gui (see VARARGIN)
-path1 = 'img_evaltests/dataset2/segment_cropped (6).png';
-path2 = 'img_evaltests/dataset2/segment_cropped (3).png';
+path1 = 'img_evaltests/dataset5/segment_cropped (3).png';
+path2 = 'img_evaltests/dataset5/segment_cropped (20).png';
 initimages();
 updategraphs(handles);
 initsliders(handles);
@@ -179,6 +179,8 @@ global path1 path2 img1_cropped img2_cropped
 %img1 = imread(path1);
 %img2 = imread(path2);
 
+img1_cropped = img1_cropped(:,:,1);
+img2_cropped = img2_cropped(:,:,1);
 axes(handles.axes1);
 imshow(img1_cropped);
 axes(handles.axes2);
