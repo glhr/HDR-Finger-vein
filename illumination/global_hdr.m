@@ -5,8 +5,8 @@ metafile = {'img_evaltests/dataset5/segment4meta.png'};
 [img_h,img_w] = size(imread( cell2mat(metafile)));
 
 files = {
-        'img_evaltests/dataset5/segment_cropped (23).png', ...
-        'img_evaltests/dataset5/segment_cropped (22).png', ...
+        %'img_evaltests/dataset5/segment_cropped (23).png', ...
+        %'img_evaltests/dataset5/segment_cropped (22).png', ...
         'img_evaltests/dataset5/segment_cropped (21).png', ...
         'img_evaltests/dataset5/segment_cropped (20).png', ...
         'img_evaltests/dataset5/segment_cropped (19).png', ...
@@ -102,8 +102,9 @@ for i = 1:numel(files)
     %expTimes(i) = mean(img(:)); 
     %expTimes{i} = img;
     expTimes{i}=zeros(size(img));
-    window = [2 5];
-    expTimes{i}= movmean(img,window);
+    window = [1 1];
+    expTimes{i}= movsum(img,window);
+    %expTimes{i}= movsum(img,window);
     expNormalized{i} = expTimes{i}./expTimes{i}(1);
 end 
 
@@ -111,9 +112,9 @@ hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'Minimum
 hdr_rgb = cat(3, hdr,hdr,hdr);
 rgb = tonemap_mod(hdr_rgb);  
 %rgb = uint8(255*mat2gray(hdr));
-subplot(2,1,2),imshow(rgb);
+subplot(2,1,2),imshow(rgb,[]);
 window = mat2str(window);
-imwrite(rgb,strcat('img_evaltests/dataset5/hdr_',window,'.png'));
+imwrite(rgb,strcat('img_evaltests/dataset5/hdr_',window,'_movsum.png'));
 
 figure;
 path = cell2mat(files(1)); 
