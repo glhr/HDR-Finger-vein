@@ -12,7 +12,7 @@ files = {
         strcat('img_evaltests/',dataset,'/segment_cropped (2).png'), ...
         strcat('img_evaltests/',dataset,'/segment_cropped (3).png'),...  
         strcat('img_evaltests/',dataset,'/segment_cropped (4).png'),...
-        strcat('img_evaltests/',dataset,'/segment_cropped (5).png'),...
+         strcat('img_evaltests/',dataset,'/segment_cropped (5).png'),...
         strcat('img_evaltests/',dataset,'/segment_cropped (6).png'),...
         strcat('img_evaltests/',dataset,'/segment_cropped (7).png'),...
         strcat('img_evaltests/',dataset,'/segment_cropped (8).png'),...
@@ -53,7 +53,7 @@ expNormalized = cell(1,numel(files));
 images = cell(1,numel(files));
 
 figure;
-montage(files);
+montage(files,'Size', [NaN 1]);
 
 
 %% single scalar relative exposure value per image 
@@ -110,7 +110,7 @@ for i = 1:numel(files)
     %expTimes(i) = mean(img(:)); 
     %expTimes{i} = img;
     expTimes{i}=zeros(size(img));
-    window = [1 10];
+    window = [2 5];
     expTimes{i}= movmean(img,window);
     %expTimes{i}= movsum(img,window);
     expNormalized{i} = expTimes{i}./expTimes{i}(1);

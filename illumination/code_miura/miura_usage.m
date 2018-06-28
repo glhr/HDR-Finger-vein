@@ -1,6 +1,6 @@
 % Howto use the miura_* scripts.
 
-function [img, overlay] = miura_usage(path, iterations, r, W, sigma, method)
+function [img, overlay, pattern] = miura_usage(path, iterations, r, W, sigma, method)
 
 img = imread(path);
 img = im2double(img(:,:,1)); % Read the image
@@ -27,7 +27,7 @@ if(method == 1)
     overlay_max_curvature(:,:,2) = img + 0.4*v_max_curvature_bin;
     overlay_max_curvature(:,:,3) = img;
     overlay = overlay_max_curvature;
-
+    pattern = v_max_curvature_bin;
 
 else
     %% Extract veins using repeated line tracking method
@@ -37,6 +37,7 @@ else
     % Binarise the vein image
     md = median(v_repeated_line(v_repeated_line>0));
     v_repeated_line_bin = v_repeated_line > md; 
+    pattern = v_repeated_line_bin;
 
     %% Match
     %cw = 80; ch=30;
