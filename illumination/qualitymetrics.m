@@ -1,8 +1,9 @@
 
 function output = qualitymetrics(img)
-    glcm = graycomatrix(img,'NumLevels',256,'GrayLimits',[],'Symmetric',true);
+
+    img = imgaussfilt(img, 1.5);
+    glcm = graycomatrix(img,'NumLevels',256,'GrayLimits',[]);
     stats = graycoprops(glcm);
-    
     
      output(7) = stats.Contrast;
      output(8) = stats.Homogeneity;

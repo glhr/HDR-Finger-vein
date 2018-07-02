@@ -10,13 +10,13 @@ function output = combine_veinpatterns(dataset,sigma)
     windows = getWindows();
     for i=1:numel(windows)
         window = mat2str(windows{i});
-        sum = sum + imread(strcat('img_evaltests/',dataset,'/maxcurve_',window,'_',num2str(sigma),'.png'));
+        sum = sum + imread(strcat('img_evaltests/',dataset,'/tonemap_linear/maxcurve',num2str(sigma),'_hdr',window,'_.png'));
     end
 
     test = uint8(255*mat2gray(sum));
     test = test > 255/numel(windows);
     output = test;
     %imshow(test);
-    imwrite(test,strcat('img_evaltests/',dataset,'/combinedpattern_',num2str(sigma),'.png'));
+    imwrite(test,strcat('img_evaltests/',dataset,'/tonemap_linear/combinedpattern_',num2str(sigma),'.png'));
 
 end

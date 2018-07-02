@@ -3,7 +3,7 @@ close all;
 
 %metafile = {'img_evaltests/dataset5/linetest.png'};
 
-dataset = 'dataset1';
+dataset = 'dataset5';
 metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
 [img_h,img_w] = size(imread( cell2mat(metafile)));
 
@@ -83,13 +83,13 @@ hdr_global = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'
 %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized);
 %rgb = localtonemap(hdr,'EnhanceContrast', 1); 
 %hdr_rgb = cat(3, hdr,hdr,hdr);
-rgb_global = tonemap(hdr_global);  
-%rgb_global = uint8(255*mat2gray(hdr_global));
+%rgb_global = tonemap(hdr_global);  
+rgb_global = uint8(255*mat2gray(hdr_global));
 if(plot)
     figure; 
     subplot(2,1,1),imshow(rgb_global,[]);
 end
-imwrite(rgb_global,strcat('img_evaltests/',dataset,'/hdr_global.png'));
+imwrite(rgb_global,strcat('img_evaltests/',dataset,'/tonemap_linear/hdr_global.png'));
 
 %% compare with moving average approach
 
@@ -129,15 +129,28 @@ for j = 1:numel(windows)
 
     hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
     %hdr_rgb = cat(3, hdr,hdr,hdr);
-    rgb = tonemap(hdr);  
-    %rgb = uint8(255*mat2gray(hdr));
+    %rgb = tonemap(hdr);  
+    rgb = uint8(255*mat2gray(hdr));
     if(plot)
         subplot(2,1,2),imshow(rgb,[]);
     end
     window = mat2str(window);
-    imwrite(rgb,strcat('img_evaltests/',dataset,'/hdr_',window,'_movmean.png'));
+    imwrite(rgb,strcat('img_evaltests/',dataset,'/tonemap_linear/hdr_',window,'_movmean.png'));
+    
+    
+    %%RECOGNITION
+    
+    for i = 1.4:0.2:3 
+        sigma = i;
+        [img, output, pattern] = miura_usage(hdr,4000,6,9,sigma,1);
+        imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_linear/maxcurve',num2str(sigma),'_hdr',window,'_.png'));
+    end
+    
 
 end
+combine_veinpatterns(dataset,sigma);
+
+%imwrite(hdr,strcat('img_evaltests/',dataset,'/tonemap_linear/hdr_',window,'_movmean_HDR.png'));
 
 % figure;
 % path = cell2mat(files(1)); 

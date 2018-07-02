@@ -1,9 +1,10 @@
 % Howto use the miura_* scripts.
 
-function [img, overlay, pattern] = miura_usage(path, iterations, r, W, sigma, method)
+function [img, overlay, pattern] = miura_usage(hdr, iterations, r, W, sigma, method)
 
-img = imread(path);
-img = im2double(img(:,:,1)); % Read the image
+%img = imread(path);
+%img = im2double(img(:,:,1)); % Read the image
+img = hdr;
 %img = imresize(img,0.75);               % Downscale image
 
 % Get the valid region, this is a binary mask which indicates the region of 
