@@ -3,8 +3,9 @@
 function [img, overlay, pattern, scores] = miura_usage(hdr, iterations, r, W, sigma, method)
 
 %img = imread(path);
-%img = im2double(img(:,:,1)); % Read the image
 img = hdr;
+img = im2double(img(:,:,1)); % Read the image
+
 %img = imresize(img,0.75);               % Downscale image
 
 % Get the valid region, this is a binary mask which indicates the region of 

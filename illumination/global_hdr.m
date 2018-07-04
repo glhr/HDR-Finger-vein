@@ -3,12 +3,12 @@ close all;
 
 %metafile = {'img_evaltests/dataset5/linetest.png'};
 
-dataset = 'dataset6';
+dataset = 'dataset7';
 metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
 [img_h,img_w] = size(imread( cell2mat(metafile)));
 
 plot = false;
-tonemap_mode = 'linear'
+tonemap_mode = 'matlab'
 
 files = {
         strcat('img_evaltests/',dataset,'/segment_cropped (1).png'); ...
@@ -85,11 +85,11 @@ hdr_global = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'
 
 %RECOGNITION
     
- for i = 1:0.5:5 
+ for i = 3:0.25:5 
     sigma = i;
     [img, output, pattern, scores] = miura_usage(hdr_global,4000,6,9,sigma,1);
     imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr_global_.png'));
-    imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr_global_.png'));
+    %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr_global_.png'));
 end
 
 if(strcmp(tonemap_mode,'linear'))
@@ -125,8 +125,14 @@ for j = 1:numel(windows)
         background = movmean(fullimg,window);
         %background = background(250:360,218:640);
         %background = imresize(background, [75 NaN]);
-        background = background(265:365,235:640);
-        background = imresize(background, [75 NaN]);
+        if(strcmp(dataset,'dataset5') || strcmp(dataset,'dataset4'))
+            background = background(250:360,218:640);
+        elseif(strcmp(dataset,'dataset6') )
+            background = background(265:365,218:640);
+        elseif(strcmp(dataset,'dataset7') )
+            background = background(245:355,218:640);
+        end
+        background = imresize(background, [100 NaN]);
         expTimes{i}= background;
         %expTimes{i}= movsum(img,window);
         expNormalized{i} = expTimes{i}./expTimes{i}(1);
@@ -149,16 +155,16 @@ for j = 1:numel(windows)
     
     %RECOGNITION
     
-    for i = 1:0.5:5 
+    for i = 3:0.25:5 
         sigma = i;
         [img, output, pattern, scores] = miura_usage(hdr,4000,6,9,sigma,1);
         imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr',window,'_.png'));
-        imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr',window,'_.png'));
+        %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr',window,'_.png'));
     end
     
 
 end
-for i = 3:0.25:5 
+for i = 3:0.25:5
     sigma = i;
     combine_veinpatterns(dataset,sigma);
 end

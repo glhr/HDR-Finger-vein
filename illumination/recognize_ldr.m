@@ -1,12 +1,13 @@
 close all
 clear all
 addpath('code_miura');
-dataset = 'dataset4';
+dataset = 'dataset7';
 
-for i = 2:0.2:3 
+for i = 3.5:0.5:4 
     sigma = i;
-    for j=1:21
-        [img, output, pattern] = miura_usage(strcat('img_evaltests/',dataset,'/segment_cropped (',num2str(j),').png'),4000,6,9,sigma,1);
+    for j=1:16
+        input = imread(strcat('img_evaltests/',dataset,'/segment_cropped (',num2str(j),').png'));
+        [img, output, pattern] = miura_usage(input,4000,6,9,sigma,1);
         % figure(1)
         % subplot(3,1,1)
         %   imshow(img,[])
