@@ -4,8 +4,10 @@ inputdataset = 'dataset4';
 % ref = imread(strcat('img_evaltests/dataset4/combinedpattern_3.png'));
 % input = imread(strcat('img_evaltests/dataset1/combinedpattern_3.png'));
 
+folder = 'img_evaltests\matching\';
+file1 = '3left_dataset4';
+file2 = '3right_dataset11';
+ref = imread(strcat(folder,file1,'.png'));
+input = imread(strcat(folder,file2,'.png'));
 
-ref = imread(strcat('img_evaltests\dataset5\maxcurve_hdr_[1 1]_movmean_2.8_imadjust.png'));
-input = imread(strcat('img_evaltests\dataset5\maxcurve_hdr_[1 1]_movmean_2.8_histeq.png'));
-
-score = miura_match(input, ref, 20, 20);
+score = miura_match(input, ref, 30, 30)

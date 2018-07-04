@@ -3,7 +3,7 @@ close all;
 
 %metafile = {'img_evaltests/dataset5/linetest.png'};
 
-dataset = 'dataset7';
+dataset = 'dataset13';
 metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
 [img_h,img_w] = size(imread( cell2mat(metafile)));
 
@@ -26,7 +26,7 @@ files = {
         strcat('img_evaltests/',dataset,'/segment_cropped (13).png');...  
         strcat('img_evaltests/',dataset,'/segment_cropped (14).png');...
         strcat('img_evaltests/',dataset,'/segment_cropped (15).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (16).png');...
+        %strcat('img_evaltests/',dataset,'/segment_cropped (16).png');...
 %         strcat('img_evaltests/',dataset,'/segment_cropped (17).png');...
 %         strcat('img_evaltests/',dataset,'/segment_cropped (18).png');...
 %         strcat('img_evaltests/',dataset,'/segment_cropped (19).png');...
@@ -64,7 +64,7 @@ end
 
 for i = 1:numel(files) 
     path = cell2mat(files(i)); 
-    img = imread(path); 
+    img = imread(path);
     images{i} = img;
   %expTimes(i) = mean(img(:)); 
   %expTimes{i} = img;
@@ -125,14 +125,7 @@ for j = 1:numel(windows)
         background = movmean(fullimg,window);
         %background = background(250:360,218:640);
         %background = imresize(background, [75 NaN]);
-        if(strcmp(dataset,'dataset5') || strcmp(dataset,'dataset4'))
-            background = background(250:360,218:640);
-        elseif(strcmp(dataset,'dataset6') )
-            background = background(265:365,218:640);
-        elseif(strcmp(dataset,'dataset7') )
-            background = background(245:355,218:640);
-        end
-        background = imresize(background, [100 NaN]);
+        background = cropimg(dataset,background);
         expTimes{i}= background;
         %expTimes{i}= movsum(img,window);
         expNormalized{i} = expTimes{i}./expTimes{i}(1);
@@ -164,10 +157,10 @@ for j = 1:numel(windows)
     
 
 end
-for i = 3:0.25:5
-    sigma = i;
-    combine_veinpatterns(dataset,sigma);
-end
+% for i = 3:0.25:5
+%     sigma = i;
+%     combine_veinpatterns(dataset,sigma);
+% end
 %imwrite(hdr,strcat('img_evaltests/',dataset,'/tonemap_linear/hdr_',window,'_movmean_HDR.png'));
 
 % figure;
