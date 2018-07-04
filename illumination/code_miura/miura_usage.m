@@ -35,12 +35,13 @@ if(method == 1)
 
 else
     %% Extract veins using repeated line tracking method
+    scores = 0;
     max_iterations = iterations; % Parameters
     v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W);
 
     % Binarise the vein image
     md = median(v_repeated_line(v_repeated_line>0));
-    v_repeated_line_bin = v_repeated_line > md; 
+    v_repeated_line_bin = v_repeated_line > md*1.5; 
     pattern = v_repeated_line_bin;
 
     %% Match

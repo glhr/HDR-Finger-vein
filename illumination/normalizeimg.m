@@ -1,5 +1,5 @@
 global dataset
-dataset = 'dataset11';
+dataset = 'dataset5';
 
 nimages = 16;
 if(strcmp(dataset,'dataset5') || strcmp(dataset,'dataset4'))

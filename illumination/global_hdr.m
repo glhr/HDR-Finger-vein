@@ -3,14 +3,20 @@ close all;
 
 %metafile = {'img_evaltests/dataset5/linetest.png'};
 
-dataset = 'dataset11';
-metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
-[img_h,img_w] = size(imread( cell2mat(metafile)));
+ndatasets = 17;
+matching_sigma = 3;
+matching_window = '[5 5]';
+
 
 plot = false;
 tonemap_mode = 'matlab'
 
-nimages = 16;
+for d = 4:1:ndatasets
+    dataset = strcat('dataset',num2str(d));
+    
+    metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
+    [img_h,img_w] = size(imread( cell2mat(metafile)));
+    nimages = 16;
 if(strcmp(dataset,'dataset5') || strcmp(dataset,'dataset4'))
     nimages = 21;
 elseif(strcmp(dataset,'dataset12') || strcmp(dataset,'dataset13') || ...
@@ -126,16 +132,16 @@ for j = 1:numel(windows)
     
     %RECOGNITION
     
-    for i = 3:0.25:3 
-        sigma = i;
-        [img, output, pattern, scores] = miura_usage(hdr,4000,6,9,sigma,1);
+    %for i = 3:0.25:3 
+        sigma = matching_sigma;
+        [img, output, pattern, scores] = miura_usage(hdr,1000,1,9,sigma,2);
         imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr',window,'_.png'));
         %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr',window,'_.png'));
         
-        if(i == 3 && strcmp(window,'[5 5]'))
-            imwrite(pattern,strcat('img_evaltests/matching/',dataset,'.png'));
+        if(strcmp(window,matching_window))
+            imwrite(pattern,strcat('img_evaltests/matching/',dataset,'_repline.png'));
         end
-    end
+    %end
     
 
 end
@@ -151,3 +157,6 @@ end
 % adjust = imadjust(img(:,:,1));
 % imshow(adjust);
 % imwrite(adjust,strcat('img_evaltests/',dataset,'/imadjust_result.png'));
+end
+
+
