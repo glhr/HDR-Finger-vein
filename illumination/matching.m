@@ -1,7 +1,7 @@
 close all;
 clear all;
 
-folder = 'img_evaltests\matching\';
+folder = 'img_evaltests\matching_ldr\';
 
 
 pairs = [   
