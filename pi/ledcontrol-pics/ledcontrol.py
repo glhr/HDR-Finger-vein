@@ -15,7 +15,7 @@ DEVICE_ADDRESS = 0x04      #7 bit address (will be left shifted to add the read 
 time.sleep(1)
 
 #[base of finger .... end of finger]
-ledstrip = [1, 0, 0, 0, 1, 0, 0, 0.3]
+#ledstrip = [1, 0.3, 0, 0, 1, 0.3, 0, 0.7]
  
 def ledsoff():
 	bus.write_i2c_block_data(DEVICE_ADDRESS, 16, [0, 0]) #turn off all the LEDs
@@ -44,17 +44,29 @@ camera.zoom = (0.0, 0.0, 1.0, 1.0)
 #camera.contrast = 50
 #camera.brightness = 12
 
-cap = "no"
+cap = "yes"
 irfilter = "no"
 fingerwindow = "no"
-extraledstrips = "left & right"
+extraledstrips = "no"
 
+finger = str(raw_input("Which finger?"));
+fingerno = int(finger[:1]);
+
+if(fingerno == 2):
+	#[base of finger .... end of finger]
+	ledstrip = [1, 0, 0, 0.3, 1, 0.5, 0, 0.7]
+else if(fingerno == 3):
+	ledstrip = [1, 0.3, 0, 0, 1, 0.3, 0, 0.7]
+else:
+	ledstrip = [1, 0, 0, 0, 1, 0, 0, 0.7]
+	
 if(enable_capture):
-	folder = time.strftime("%m-%d_%H-%M-%S")
+	folder = time.strftime(finger+" %m-%d_%H-%M-%S")
 	if not os.path.exists(folder):
 	    os.makedirs(folder)
 
 	lines =[
+	"finger: " + finger,
 	"--------------SETUP--------------",
 	"illumination pattern: "+str(ledstrip),
 	"cap/dark housing: "+cap,
