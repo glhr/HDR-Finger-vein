@@ -3,50 +3,26 @@ close all;
 
 %metafile = {'img_evaltests/dataset5/linetest.png'};
 
-dataset = 'dataset13';
+dataset = 'dataset11';
 metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
 [img_h,img_w] = size(imread( cell2mat(metafile)));
 
 plot = false;
 tonemap_mode = 'matlab'
 
-files = {
-        strcat('img_evaltests/',dataset,'/segment_cropped (1).png'); ...
-        strcat('img_evaltests/',dataset,'/segment_cropped (2).png'); ...
-        strcat('img_evaltests/',dataset,'/segment_cropped (3).png');...  
-        strcat('img_evaltests/',dataset,'/segment_cropped (4).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (5).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (6).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (7).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (8).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (9).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (10).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (11).png'); ...
-        strcat('img_evaltests/',dataset,'/segment_cropped (12).png'); ...
-        strcat('img_evaltests/',dataset,'/segment_cropped (13).png');...  
-        strcat('img_evaltests/',dataset,'/segment_cropped (14).png');...
-        strcat('img_evaltests/',dataset,'/segment_cropped (15).png');...
-        %strcat('img_evaltests/',dataset,'/segment_cropped (16).png');...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (17).png');...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (18).png');...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (19).png');...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (20).png');...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (21).png');...
-         }; 
+nimages = 16;
+if(strcmp(dataset,'dataset5') || strcmp(dataset,'dataset4'))
+    nimages = 21;
+elseif(strcmp(dataset,'dataset12') || strcmp(dataset,'dataset13') || ...
+        strcmp(dataset,'dataset14') || strcmp(dataset,'dataset15') || ...
+        strcmp(dataset,'dataset16') || strcmp(dataset,'dataset17'))
+    nimages = 15;
+end
 
-% files = {
-%         strcat('img_evaltests/',dataset,'/segment_cropped (1).png'), ...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (2).png'), ...
-%         strcat('img_evaltests/',dataset,'/segment_cropped (3).png'),...  
-%         strcat('img_evaltests/',dataset,'/segment_cropped (4).png'),...
-%          %'img_evaltests/dataset1/segment_cropped (5).png'...
-%          }; 
-
-% files = {
-%         'img_evaltests/dataset5/linetest_exp2.png', ...
-%         'img_evaltests/dataset5/linetest_exp3.png', ...
-%         'img_evaltests/dataset5/linetest_exp4.png', ...
-%         };
+files = cell(1,nimages);
+for n = 1:1:nimages
+    files{n} = strcat('img_evaltests/',dataset,'/segment_cropped (',num2str(n),').png');
+end
 
 exposure_min = 1;
 exposure_max = 255;
@@ -79,30 +55,32 @@ end
 if(plot)
     montage(files) 
 end
-hdr_global = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-%hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized);
-%rgb = localtonemap(hdr,'EnhanceContrast', 1); 
 
-%RECOGNITION
-    
- for i = 3:0.25:5 
-    sigma = i;
-    [img, output, pattern, scores] = miura_usage(hdr_global,4000,6,9,sigma,1);
-    imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr_global_.png'));
-    %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr_global_.png'));
-end
 
-if(strcmp(tonemap_mode,'linear'))
-   rgb_global = uint8(255*mat2gray(hdr_global));
-else
-   rgb_global = tonemap(hdr_global);  
-end
-
-if(plot)
-    figure; 
-    subplot(2,1,1),imshow(rgb_global,[]);
-end
-imwrite(rgb_global,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/hdr_global.png'));
+% hdr_global = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
+% %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized);
+% %rgb = localtonemap(hdr,'EnhanceContrast', 1); 
+% 
+% %RECOGNITION
+%     
+%  for i = 3:0.25:3 
+%     sigma = i;
+%     [img, output, pattern, scores] = miura_usage(hdr_global,4000,6,9,sigma,1);
+%     imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr_global_.png'));
+%     %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr_global_.png'));
+% end
+% 
+% if(strcmp(tonemap_mode,'linear'))
+%    rgb_global = uint8(255*mat2gray(hdr_global));
+% else
+%    rgb_global = tonemap(hdr_global);  
+% end
+% 
+% if(plot)
+%     figure; 
+%     subplot(2,1,1),imshow(rgb_global,[]);
+% end
+% imwrite(rgb_global,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/hdr_global.png'));
 
 %% compare with moving average approach
 
@@ -148,11 +126,15 @@ for j = 1:numel(windows)
     
     %RECOGNITION
     
-    for i = 3:0.25:5 
+    for i = 3:0.25:3 
         sigma = i;
         [img, output, pattern, scores] = miura_usage(hdr,4000,6,9,sigma,1);
         imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr',window,'_.png'));
         %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr',window,'_.png'));
+        
+        if(i == 3 && strcmp(window,'[5 5]'))
+            imwrite(pattern,strcat('img_evaltests/matching/',dataset,'.png'));
+        end
     end
     
 

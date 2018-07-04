@@ -1,10 +1,12 @@
 global dataset
-dataset = 'dataset12';
+dataset = 'dataset11';
 
 nimages = 16;
 if(strcmp(dataset,'dataset5') || strcmp(dataset,'dataset4'))
     nimages = 21;
-elseif(strcmp(dataset,'dataset12') || strcmp(dataset,'dataset13') || strcmp(dataset,'dataset14') || strcmp(dataset,'dataset15'))
+elseif(strcmp(dataset,'dataset12') || strcmp(dataset,'dataset13') || ...
+        strcmp(dataset,'dataset14') || strcmp(dataset,'dataset15') || ...
+        strcmp(dataset,'dataset16') || strcmp(dataset,'dataset17'))
     nimages = 15;
 end
     
