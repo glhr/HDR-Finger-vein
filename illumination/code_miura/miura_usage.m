@@ -1,6 +1,6 @@
 % Howto use the miura_* scripts.
 
-function [img, overlay, pattern] = miura_usage(hdr, iterations, r, W, sigma, method)
+function [img, overlay, pattern, scores] = miura_usage(hdr, iterations, r, W, sigma, method)
 
 %img = imread(path);
 %img = im2double(img(:,:,1)); % Read the image
@@ -18,14 +18,16 @@ fvr = ones(size(img));
 if(method == 1)
     %% Extract veins using maximum curvature method
     %sigma = 2; % Parameter
-    v_max_curvature = miura_max_curvature(img,fvr,sigma);
+    [v_max_curvature,k,score] = miura_max_curvature(img,fvr,sigma);
+    scores = score;
     % Binarise the vein image
     md = median(v_max_curvature(v_max_curvature>0));
-    v_max_curvature_bin = v_max_curvature > md; 
+    %v_max_curvature_bin = v_max_curvature > md; 
+    v_max_curvature_bin = v_max_curvature > 0; 
     % Overlay the extracted veins on the original image
     overlay_max_curvature = zeros([size(img) 3]);
     overlay_max_curvature(:,:,1) = img;
-    overlay_max_curvature(:,:,2) = img + 0.4*v_max_curvature_bin;
+    overlay_max_curvature(:,:,2) = double(img) + 0.4*double(v_max_curvature_bin);
     overlay_max_curvature(:,:,3) = img;
     overlay = overlay_max_curvature;
     pattern = v_max_curvature_bin;

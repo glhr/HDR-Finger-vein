@@ -1,4 +1,4 @@
-function veins = miura_max_curvature(img, fvr, sigma)
+function [veins,k,Vt] = miura_max_curvature(img, fvr, sigma)
 % Maximum curvature method
 
 % Parameters:
@@ -55,7 +55,7 @@ k(:,:,3) = (f11./((1 + f1.^2).^(3/2))).*fvr; % \
 k(:,:,4) = (f22./((1 + f2.^2).^(3/2))).*fvr; % / 
 
 %% Scores
-%V = zeros(img_h, img_w, 4);
+V = zeros(img_h, img_w, 4);
 Vt = zeros(img_h, img_w, 4);
 Wr = 0;
 
@@ -79,7 +79,7 @@ for y=1:img_h
             [~, I] = max(k(y, pos_start:pos_end,1));
             pos_max = pos_start + I - 1;
             Scr = k(y,pos_max,1)*Wr;
-            %V(y,pos_max,1) = V(y,pos_max,1) + Scr;
+            V(y,pos_max,1) = V(y,pos_max,1) + Scr;
             Vt(y,pos_max) = Vt(y,pos_max) + Scr;
             Wr = 0; 
         end
@@ -106,7 +106,7 @@ for x=1:img_w
             [~, I] = max(k(pos_start:pos_end,x,2));
             pos_max = pos_start + I - 1;
             Scr = k(pos_max,x,2)*Wr;
-            %V(pos_max,x,2) = V(pos_max,x,2) + Scr;
+            V(pos_max,x,2) = V(pos_max,x,2) + Scr;
             Vt(pos_max,x) = Vt(pos_max,x) + Scr;
             Wr = 0;
         end
@@ -150,7 +150,7 @@ for start=1:(img_w+img_h-1)
             pos_x_max = pos_x_start + I - 1;
             pos_y_max = pos_y_start + I - 1;
             Scr = k(pos_y_max,pos_x_max,3)*Wr;
-            %V(pos_y_max,pos_x_max,3) = V(pos_y_max,pos_x_max,3) + Scr;
+            V(pos_y_max,pos_x_max,3) = V(pos_y_max,pos_x_max,3) + Scr;
             Vt(pos_y_max,pos_x_max) = Vt(pos_y_max,pos_x_max) + Scr;
             Wr = 0;
         end
@@ -201,7 +201,7 @@ for start=1:(img_w+img_h-1)
             pos_x_max = pos_x_start + I - 1;
             pos_y_max = pos_y_start - I + 1;
             Scr = k(pos_y_max,pos_x_max,4)*Wr;
-            %V(pos_y_max,pos_x_max,4) = V(pos_y_max,pos_x_max,4) + Scr;
+            V(pos_y_max,pos_x_max,4) = V(pos_y_max,pos_x_max,4) + Scr;
             Vt(pos_y_max,pos_x_max) = Vt(pos_y_max,pos_x_max) + Scr;
             Wr = 0;
         end
@@ -234,7 +234,7 @@ end
 
 veins = max(Cd,[],3);
 
-% %% Plot results
+%% Plot results
 % figure('Name', 'Second order derivatives');
 % subplot(2,2,1);
 %   imshow(fxx, []);
@@ -244,39 +244,8 @@ veins = max(Cd,[],3);
 %   title('Vertical');
 % subplot(2,2,3);
 %   imshow(f11, []);
-%   title('\');
+%   title('a');
 % subplot(2,2,4);
 %   imshow(f22, []);
-%   title('/');
-% 
-% figure('Name', 'Curvatures');
-% subplot(2,2,1);
-%   %imshow(log(k(:,:,1) + 1), []);
-%   imshow(k(:,:,1) > 0, []);
-%   title('Horizontal');
-% subplot(2,2,2);
-%   %imshow(log(k(:,:,2) + 1), []);
-%   imshow(k(:,:,2) > 0, []);
-%   title('Vertical');
-% subplot(2,2,3);
-%   %imshow(log(k(:,:,3) + 1), []);
-%   imshow(k(:,:,3) > 0, []);
-%   title('\');
-% subplot(2,2,4);
-%   %imshow(log(k(:,:,4) + 1), []);
-%   imshow(k(:,:,4) > 0, []);
-%   title('/');
-%   
-% figure('Name', 'Scores');
-% subplot(2,2,1);
-%   imshow(V(:,:,1));
-%   title('Horizontal');
-% subplot(2,2,2);
-%   imshow(V(:,:,2));
-%   title('Vertical');
-% subplot(2,2,3);
-%   imshow(V(:,:,3));
-%   title('\');
-% subplot(2,2,4);
-%   imshow(V(:,:,3));
-%   title('/');
+%   title('b');
+

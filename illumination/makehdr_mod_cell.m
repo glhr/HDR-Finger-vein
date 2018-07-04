@@ -134,7 +134,8 @@ for p = 1:numel(images)
     % Bring the intensity of the LDR image into a common HDR domain by
     % "normalizing" using the relative exposure, and then add it to the
     % accumulator.
-    hdr = hdr + single(ldr) ./ double(relExposure);
+    background_suppr = single(ldr) ./ double(relExposure);
+    hdr = hdr + background_suppr;
 end
 
 % Average the values in the accumulator by the number of LDR images

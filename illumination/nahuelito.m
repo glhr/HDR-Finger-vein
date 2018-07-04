@@ -35,16 +35,55 @@ files = {
 %         'img_evaltests/dataset5/linetest.png', ...
 %         };
 
+    window = [10 10];
+    
 path = cell2mat(files(15)); 
 img = imread(path); 
+img2 = imread('img_evaltests/dataset5/segment_cropped (20)_test.png');
+
+figure;
+subplot(4,1,1),imshowpair(img,img2,'montage');
+
+mean2(img) - 127
+img = img - (mean2(img) - 127);
+mean2(img2) - 127
+img2 = img2 - 70.3206;
+
+
 images{1} = img;
 %expTimes(i) = mean(img(:)); 
 %expTimes{i} = img;
 expTimes{1}=zeros(size(img));
-    window = [10 10];
-    expTimes{1}= movmean(img,window);
-  expNormalized{1} = expTimes{1}./expTimes{1}(1);
+expTimes{1}= movmean(img,window);
+expNormalized{1} = expTimes{1}./expTimes{1}(1);
 
-subplot(3,1,1),imshow(images{1});
-subplot(3,1,2),imshow(expNormalized{1});
-subplot(3,1,3),imshow(double(images{1}) ./ expNormalized{1},[]);
+expTimes{2}=zeros(size(img2));
+expTimes{2}= movmean(img2,window);
+expNormalized{2} =expTimes{2}./expTimes{1}(1);
+nahuel2 = imgaussfilt(nahuel, 1.5);
+[Gx,Gy] = imgradientxy(img2);
+Gx = uint8(255*mat2gray(abs(Gx)));
+Gx = imgaussfilt(Gx, 1.5);
+Gy = uint8(255*mat2gray(abs(Gy)));
+Gy = imgaussfilt(Gy, 1.5);
+%subplot(4,1,4),imshowpair(Gx > 0.2, Gy >0.2, 'montage');
+subplot(4,1,4),imshow((Gx)+(Gy),[]);
+gradientsum = Gx + Gy;
+gradientweight = (gradientsum > 0);
+
+
+figure;
+subplot(4,1,1),imshowpair(img,img2,'montage');
+subplot(4,1,2),imshow(expNormalized{2});
+
+firstterm = (double(images{1}) ./ expNormalized{1});
+bestimg = firstterm;
+secondterm = (double(img2) ./ expNormalized{2}).*double(gradientweight);
+secondterm(isnan(secondterm)) = bestimg(isnan(secondterm));
+
+nahuel = firstterm + secondterm;
+
+nahuel = uint8(255*mat2gray(nahuel));
+subplot(4,1,3),imshow(nahuel);
+
+subplot(4,1,4),imshowpair(firstterm,secondterm,'montage');
