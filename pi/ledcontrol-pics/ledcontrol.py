@@ -21,6 +21,19 @@ def ledsoff():
 	bus.write_i2c_block_data(DEVICE_ADDRESS, 16, [0, 0]) #turn off all the LEDs
 	return
 	
+def setleds(leds):
+	for i in range(len(leds)):
+		#print 'Setting LED ',i+1,' to ', leds[i]
+		pwm = leds[i]
+		if(pwm>1024):
+			pwm = 1024;
+		byte1 = pwm >> 8
+		byte2 = pwm & 255
+		ledout_bytes = [byte1, byte2]
+		bus.write_i2c_block_data(DEVICE_ADDRESS, i+8, ledout_bytes)
+		time.sleep(0.001)
+	return
+	
 ledsoff()
 
 ## SETUP CAMERA
@@ -54,8 +67,8 @@ fingerno = int(finger[:1]);
 
 if(fingerno == 2):
 	#[base of finger .... end of finger]
-	ledstrip = [1, 0, 0, 0.3, 1, 0.5, 0, 0.7]
-else if(fingerno == 3):
+	ledstrip = [1, 1, 0, 0.3, 1, 0.5, 0, 0.5]
+elif(fingerno == 3):
 	ledstrip = [1, 0.3, 0, 0, 1, 0.3, 0, 0.7]
 else:
 	ledstrip = [1, 0, 0, 0, 1, 0, 0, 0.7]
@@ -100,16 +113,7 @@ else:
 for dutycyle in range(0,int(2000/(max(ledstrip))),pwmstep):
 	leds = [int(a*dutycyle) for a in ledstrip]
 
-	for i in range(len(leds)):
-		#print 'Setting LED ',i+1,' to ', leds[i]
-		pwm = leds[i]
-		if(pwm>1024):
-			pwm = 1024;
-		byte1 = pwm >> 8
-		byte2 = pwm & 255
-		ledout_bytes = [byte1, byte2]
-		bus.write_i2c_block_data(DEVICE_ADDRESS, i+8, ledout_bytes)
-		time.sleep(0.01)
+	setleds(leds)
 	
 	if(max(leds)>0):
 		ledstr = [str(a) for a in leds]
@@ -121,6 +125,16 @@ for dutycyle in range(0,int(2000/(max(ledstrip))),pwmstep):
 			camera.capture(folder+"/"+timestr+'['+imgpath+'].png')
 	
 	if(max(leds)>=pwmmax):
+		leds = [1024, 1024, 1024, 1024, 1024, 1024, 1024, 300]
+		setleds(leds)
+		
+		ledstr = [str(a) for a in leds]
+		imgpath = ','.join(ledstr)
+		
+		print '[', imgpath, ']'
+		if(enable_capture):
+			timestr = time.strftime("%m-%d_%H-%M-%S")
+			camera.capture(folder+"/"+timestr+'['+imgpath+'].png')
 		break;
 
 	if((not enable_capture) and (enable_preview)):
