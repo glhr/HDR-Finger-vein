@@ -24,3 +24,5 @@ octave-workspace
 illumination/img_*
 *.png
 *.jpg
+*.txt
+*.pdf
