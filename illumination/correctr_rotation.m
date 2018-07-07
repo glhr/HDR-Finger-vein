@@ -1,8 +1,8 @@
 folder = 'img_evaltests\matching\';
 file1 = 'dataset15';
-file2 = 'dataset17';
+file2 = 'dataset18';
 fixed = imread(strcat(folder,file1,'_maxcurve.png'));
-moving = imread(strcat(folder,file2,'_maxcurve.png'));
+moving = imread(strcat(folder,file2,'_maxcurve_ref.png'));
 moving2 = imread(strcat(folder,file2,'_repline.png'));
 
 tformEstimate = imregcorr(moving,fixed,'transformtype','rigid');

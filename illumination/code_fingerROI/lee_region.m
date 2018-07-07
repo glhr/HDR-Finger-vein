@@ -24,7 +24,8 @@ function [region, edges] = lee_region(img, mask_h, mask_w)
 % Date:    20th March 2012
 % License: Simplified BSD License
 
-[img_h, img_w] = size(img);
+
+[img_h, img_w,dim] = size(img);
 
 % Determine lower half starting point
 if mod(img_h,2) == 0

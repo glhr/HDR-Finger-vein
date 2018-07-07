@@ -145,20 +145,159 @@ for i = 1:1:npairs
     
 end
 
-cmap = hsv(2);
+score_corr = [];
+
+for n = 4:1:17
+    ref1 = imread(strcat(folder,'dataset',num2str(n),'_maxcurve.png'));
+    ref2 = imread(strcat(folder,'dataset',num2str(n),'_repline.png'));
+    corr = miura_match(ref2, ref1, 30, 30);
+    score_corr = [score_corr corr];
+end
+
+cmap = hsv(3);
+
 figure;
-subplot(2,1,1);
+subplot(3,1,1);
 
 histogram(imposterscores_maxcurve,0:0.005:0.5,'facecolor',cmap(1,:),'facealpha',.5,'edgecolor','none');
 hold on
-histogram(matchscores_maxcurve,0:0.005:0.5,'facecolor',cmap(2,:),'facealpha',.5,'edgecolor','none');
-title('Maximum curve, sigma = 3')
-subplot(2,1,2);
+histogram(matchscores_maxcurve,0:0.005:0.5,'facecolor',cmap(3,:),'facealpha',.5,'edgecolor','none');
+title('Maximum curve, sigma = 2.5')
 
+subplot(3,1,2);
 histogram(imposterscores_repline,0:0.005:0.5,'facecolor',cmap(1,:),'facealpha',.5,'edgecolor','none');
 hold on
-histogram(matchscores_repline,0:0.005:0.5,'facecolor',cmap(2,:),'facealpha',.5,'edgecolor','none');
-title('Repeated line tracking, r = 1, W = 9')
+histogram(matchscores_repline,0:0.005:0.5,'facecolor',cmap(3,:),'facealpha',.5,'edgecolor','none');
+title('Repeated line tracking, r = 1, W = 13')
 
-% figure;
-% imshowpair(ref,input,'montage');
+subplot(3,1,3);
+histogram(score_corr,0:0.005:0.5,'facecolor',cmap(2,:),'facealpha',.5,'edgecolor','none');
+title('Correlation between MC & RLT vein patterns')
+
+%% HDR GLOBAL
+folder = 'img_evaltests\matching_hdrglobal\';
+
+imposterscores_maxcurve = [];
+matchscores_maxcurve = [];
+imposterscores_repline = [];
+matchscores_repline = [];
+
+algo = 'maxcurve';
+
+npairs = size(pairs);
+for i = 1:1:npairs
+    file1 = pairs(i,1);
+    file2 = pairs(i,2);
+    
+    ref1 = imread(strcat(folder,'dataset',num2str(file1),'_maxcurve.png'));
+    input1 = imread(strcat(folder,'dataset',num2str(file2),'_maxcurve.png'));
+    
+    ref2 = imread(strcat(folder,'dataset',num2str(file1),'_repline.png'));
+    input2 = imread(strcat(folder,'dataset',num2str(file2),'_repline.png'));
+
+    score_maxcurve = miura_match(input1, ref1, 30, 30);
+    score_repline = miura_match(input2, ref2, 30, 30);
+    
+    if(pairs(i,3) == 0)
+        imposterscores_maxcurve = [imposterscores_maxcurve score_maxcurve];
+        imposterscores_repline = [imposterscores_repline score_repline];
+        %sprintf('IMPOSTER\t %0.5f \t %i vs %i \n',score,file1,file2);
+    elseif(pairs(i,3) == 1)
+        matchscores_maxcurve = [matchscores_maxcurve score_maxcurve];
+        matchscores_repline = [matchscores_repline score_repline];
+        fprintf('MATCH\t %0.5f (maxcurve) / %0.5f (repline) \t %i vs %i\n',score_maxcurve,score_repline,file1,file2);
+    end
+    
+    
+end
+
+score_corr = [];
+
+for n = 4:1:17
+    ref1 = imread(strcat(folder,'dataset',num2str(n),'_maxcurve.png'));
+    ref2 = imread(strcat(folder,'dataset',num2str(n),'_repline.png'));
+    corr = miura_match(ref2, ref1, 30, 30);
+    score_corr = [score_corr corr];
+end
+
+figure;
+subplot(3,1,1);
+
+histogram(imposterscores_maxcurve,0:0.005:0.5,'facecolor',cmap(1,:),'facealpha',.5,'edgecolor','none');
+hold on
+histogram(matchscores_maxcurve,0:0.005:0.5,'facecolor',cmap(3,:),'facealpha',.5,'edgecolor','none');
+title('Maximum curve, sigma = 2.5')
+
+subplot(3,1,2);
+histogram(imposterscores_repline,0:0.005:0.5,'facecolor',cmap(1,:),'facealpha',.5,'edgecolor','none');
+hold on
+histogram(matchscores_repline,0:0.005:0.5,'facecolor',cmap(3,:),'facealpha',.5,'edgecolor','none');
+title('Repeated line tracking, r = 1, W = 13')
+
+subplot(3,1,3);
+histogram(score_corr,0:0.005:0.5,'facecolor',cmap(2,:),'facealpha',.5,'edgecolor','none');
+title('Correlation between MC & RLT vein patterns')
+
+%% HDR
+folder = 'img_evaltests\matching\';
+
+imposterscores_maxcurve = [];
+matchscores_maxcurve = [];
+imposterscores_repline = [];
+matchscores_repline = [];
+
+algo = 'maxcurve';
+
+npairs = size(pairs);
+for i = 1:1:npairs
+    file1 = pairs(i,1);
+    file2 = pairs(i,2);
+    
+    ref1 = imread(strcat(folder,'dataset',num2str(file1),'_maxcurve[7 7].png'));
+    input1 = imread(strcat(folder,'dataset',num2str(file2),'_maxcurve[7 7].png'));
+    
+    ref2 = imread(strcat(folder,'dataset',num2str(file1),'_repline.png'));
+    input2 = imread(strcat(folder,'dataset',num2str(file2),'_repline.png'));
+
+    score_maxcurve = miura_match(input1, ref1, 30, 30);
+    score_repline = miura_match(input2, ref2, 30, 30);
+    
+    if(pairs(i,3) == 0)
+        imposterscores_maxcurve = [imposterscores_maxcurve score_maxcurve];
+        imposterscores_repline = [imposterscores_repline score_repline];
+        %sprintf('IMPOSTER\t %0.5f \t %i vs %i \n',score,file1,file2);
+    elseif(pairs(i,3) == 1)
+        matchscores_maxcurve = [matchscores_maxcurve score_maxcurve];
+        matchscores_repline = [matchscores_repline score_repline];
+        fprintf('MATCH\t %0.5f (maxcurve) / %0.5f (repline) \t %i vs %i\n',score_maxcurve,score_repline,file1,file2);
+    end
+    
+    
+end
+
+score_corr = [];
+
+for n = 4:1:17
+    ref1 = imread(strcat(folder,'dataset',num2str(n),'_maxcurve.png'));
+    ref2 = imread(strcat(folder,'dataset',num2str(n),'_repline.png'));
+    corr = miura_match(ref2, ref1, 30, 30);
+    score_corr = [score_corr corr];
+end
+
+figure;
+subplot(3,1,1);
+
+histogram(imposterscores_maxcurve,0:0.005:0.5,'facecolor',cmap(1,:),'facealpha',.5,'edgecolor','none');
+hold on
+histogram(matchscores_maxcurve,0:0.005:0.5,'facecolor',cmap(3,:),'facealpha',.5,'edgecolor','none');
+title('Maximum curve, sigma = 2.5')
+
+subplot(3,1,2);
+histogram(imposterscores_repline,0:0.005:0.5,'facecolor',cmap(1,:),'facealpha',.5,'edgecolor','none');
+hold on
+histogram(matchscores_repline,0:0.005:0.5,'facecolor',cmap(3,:),'facealpha',.5,'edgecolor','none');
+title('Repeated line tracking, r = 1, W = 13')
+
+subplot(3,1,3);
+histogram(score_corr,0:0.005:0.5,'facecolor',cmap(2,:),'facealpha',.5,'edgecolor','none');
+title('Correlation between MC & RLT vein patterns')

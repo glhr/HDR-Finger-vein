@@ -23,8 +23,8 @@ if(method == 1)
     scores = score;
     % Binarise the vein image
     md = median(v_max_curvature(v_max_curvature>0));
-    %v_max_curvature_bin = v_max_curvature > md; 
-    v_max_curvature_bin = v_max_curvature > 0; 
+    v_max_curvature_bin = v_max_curvature > md; 
+    %v_max_curvature_bin = v_max_curvature > 0; 
     % Overlay the extracted veins on the original image
     overlay_max_curvature = zeros([size(img) 3]);
     overlay_max_curvature(:,:,1) = img;

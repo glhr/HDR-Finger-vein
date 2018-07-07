@@ -4,16 +4,16 @@ addpath('code_miura');
 dataset = 'dataset7';
 
 %for i = 3.5:0.5:4 
-    sigma = 3;
+    sigma = 2.5;
     %for j=1:16
     
-    for d = 4:1:17
+    for d = 6:1:17
         dataset = strcat('dataset',num2str(d));
     
         j = 10;
         input = imread(strcat('img_evaltests/',dataset,'/segment_cropped (',num2str(j),').png'));
         [img, output, pattern] = miura_usage(input,1000,6,9,sigma,1);
-        [img, output, pattern2] = miura_usage(input,1000,1,9,sigma,2);
+        [img, output, pattern2] = miura_usage(input,1000,1,13,sigma,2);
         % figure(1)
         % subplot(3,1,1)
         %   imshow(img,[])
