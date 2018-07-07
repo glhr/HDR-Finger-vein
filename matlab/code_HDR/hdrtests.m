@@ -12,10 +12,12 @@ end
 
 images = cell(1,numel(files));
 
-% if(plot)
-%     figure;
-%     montage(files,'Size', [NaN 1]);
-% end
+if(plot)
+    figure;
+    montage(files,'Size', [NaN 1]);
+end
+
+%% Basic HDR using mean gray value as weight in reconstruction
 
 for i = 1:numel(files) 
     path = cell2mat(files(i)); 
@@ -25,22 +27,15 @@ for i = 1:numel(files)
     expNormalized(i) = (expTimes(i) / expTimes(1));
     weight = 1;
 
-    if(i == 1)
-        hdr_global = (single(img) .* weight);
-    else
-        hdr_global = hdr_global + (single(img) .* weight)./expNormalized(i);
-    end
+    hdr_global = hdr_global + (single(img) .* weight)./expNormalized(i);
 end
 
-% Average the values in the accumulator by the number of LDR images
-% that contributed to each pixel to produce the HDR radiance map.
+% Average the values in the accumulator by the number of LDR images that contributed to each pixel to produce the HDR radiance map.
 hdr_global = hdr_global ./ numel(files);
 
-% if(plot)
-%     montage(files) 
-% end
-
-%hdr_global = makehdr(files,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
+if(plot)
+    montage(files) 
+end
 
 rgb_lin = uint8(255*mat2gray(hdr_global));
 rgb_tonem = tonemap(hdr_global,'NumberOfTiles',[10 10]);  
@@ -57,7 +52,8 @@ if(plot)
     imwrite(rgb_tonem,'results/hdrimpl/global_tonemap.png');
 end
 
-%% 
+%% HDR using moving mean filter as weight
+% the list of moving mean filter windows to be tested is in the getWindows file
 expTimes = [];
 expNormalized = [];
 windows = getWindows();
@@ -66,36 +62,21 @@ for j = 1:numel(windows)
     for i = 1:numel(files) 
         path = cell2mat(files(i)); 
         img = imread(path); 
-        %expTimes(i) = mean(img(:)); 
-        %expTimes{i} = img;
-
         window = windows{j};
-        %padwindow = window.*10;
-        %paddedimg = padarray(img,padwindow,'symmetric','both');
-        %background = movmean(paddedimg,window);
         [h w] = size(img);
-        %background = background(padwindow(1)+1:h-padwindow(1),padwindow(2)+1:w-padwindow(2),:);
+        
         fullimg = imread(strcat('img_evaltests/',dataset,'/segment_norm (',num2str(i),').png'));
         background = movmean(fullimg,window);
-        %background = background(250:360,218:640);
-        %background = imresize(background, [75 NaN]);
         background = background(55:160,50:410);
-        %background = cropimg(dataset,background);
-         expTimes(i)= mean(img(:));
+        
+        expTimes(i)= mean(img(:));
         expNormalized(i) = (expTimes(i) / expTimes(1));
-        if(i == 1)
-            hdr = single(img) ./ background;
-        else
-            hdr = hdr + (single(img) ./ background) ./ expNormalized(i);
-        end
+        
+        hdr = hdr + (single(img) ./ background) ./ expNormalized(i);
     end 
     
     hdr = hdr ./ numel(files);
-
-    %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
-    
-    
-    
+      
     rgb_lin = uint8(255*mat2gray(hdr));
     rgb_tonem = tonemap(hdr);  
     windowstr = mat2str(window);

@@ -1,15 +1,12 @@
 clear all;
 close all;
 
-%metafile = {'img_evaltests/dataset5/linetest.png'};
-
 ndatasets = 17;
 matching_sigma = 2.5;
 matching_window = '[5 5]';
 
-
 plot = false;
-tonemap_mode = 'matlab'
+tonemap_mode = 'matlab';
 
 for d = 6:1:ndatasets
     dataset = strcat('dataset',num2str(d));
@@ -100,21 +97,13 @@ for j = 1:numel(windows)
     for i = 1:numel(files) 
 path = cell2mat(files(i)); 
         img = imread(path); 
-        %expTimes(i) = mean(img(:)); 
-        %expTimes{i} = img;
-
         window = windows{j};
-        %padwindow = window.*10;
-        %paddedimg = padarray(img,padwindow,'symmetric','both');
-        %background = movmean(paddedimg,window);
+
         [h w] = size(img);
-        %background = background(padwindow(1)+1:h-padwindow(1),padwindow(2)+1:w-padwindow(2),:);
         fullimg = imread(strcat('img_evaltests/',dataset,'/segment_norm (',num2str(i),').png'));
         background = movmean(fullimg,window);
-        %background = background(250:360,218:640);
-        %background = imresize(background, [75 NaN]);
         background = background(55:160,50:410);
-        %background = cropimg(dataset,background);
+
          expTimes(i)= mean(img(:));
         expNormalized(i) = (expTimes(i) / expTimes(1));
         if(i == 1)
@@ -122,13 +111,11 @@ path = cell2mat(files(i));
         else
             hdr = hdr + (single(img) ./ background) ./ expNormalized(i);
         end
-    end 
-
-    %hdr = makehdr_mod_cell(metafile,images,'RelativeExposure',expNormalized,'MinimumLimit',exposure_min,'MaximumLimit',exposure_max);
+    end
+    
     hdr = hdr ./ numel(files);
     
     window = mat2str(window);
-    %hdr_rgb = cat(3, hdr,hdr,hdr);
     tonemap_mode = 'linear';
         rgb = uint8(255*mat2gray(hdr));
         imwrite(rgb,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/hdr_',window,'_movmean.png'));
@@ -151,33 +138,21 @@ path = cell2mat(files(i));
         %imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/maxcurve',num2str(sigma),'_hdr',window,'_.png'));
         %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr',window,'_.png'));
         
-        %if(strcmp(window,matching_window))
+        if(strcmp(window,matching_window))
             imwrite(pattern,strcat('img_evaltests/matching/',dataset,'_maxcurve',window,'.png'));
-        %end
+        end
         
         
         [img, output, pattern, scores] = miura_usage(hdr,1000,1,13,sigma,2);
         %imwrite(pattern,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/repline',num2str(sigma),'_hdr',window,'_.png'));
         %imwrite(scores(:,:,1) > 0,strcat('img_evaltests/',dataset,'/tonemap_',tonemap_mode,'/scoresmaxcurve',num2str(sigma),'_hdr',window,'_.png'));
         
-        %if(strcmp(window,matching_window))
+        if(strcmp(window,matching_window))
             imwrite(pattern,strcat('img_evaltests/matching/',dataset,'_repline.png'));
+        end
     %end
-    
 
 end
-% for i = 3:0.25:5
-%     sigma = i;
-%     combine_veinpatterns(dataset,sigma);
-% end
-%imwrite(hdr,strcat('img_evaltests/',dataset,'/tonemap_linear/hdr_',window,'_movmean_HDR.png'));
-
-% figure;
-% path = cell2mat(files(1)); 
-% img = imread(path); 
-% adjust = imadjust(img(:,:,1));
-% imshow(adjust);
-% imwrite(adjust,strcat('img_evaltests/',dataset,'/imadjust_result.png'));
 
 
 
