@@ -4,25 +4,27 @@ dataset = 'dataset16';
 window = [7 7];
 windowstr = '[7 7]';
 
-metafile = {strcat('img_evaltests/',dataset,'/segment_cropped (1).png')};
+glob = globals;
+
 plot = true;
 for n = 1:1:15
-    files{n} = strcat('img_evaltests/',dataset,'/segment_cropped (',num2str(n),').png');
+    files{n} = glob.getImgPath(dataset,n,'segment');
 end
-
-images = cell(1,numel(files));
 
 if(plot)
     figure;
     montage(files,'Size', [NaN 1]);
 end
 
+hdr_global = zeros(size(imread(files{1})));
+hdr = zeros(size(imread(files{1})));
+
 %% Basic HDR using mean gray value as weight in reconstruction
 
 for i = 1:numel(files) 
     path = cell2mat(files(i)); 
     img = imread(path);
-    images{i} = img;
+
     expTimes(i)= mean(img(:));
     expNormalized(i) = (expTimes(i) / expTimes(1));
     weight = 1;
@@ -33,22 +35,18 @@ end
 % Average the values in the accumulator by the number of LDR images that contributed to each pixel to produce the HDR radiance map.
 hdr_global = hdr_global ./ numel(files);
 
-if(plot)
-    montage(files) 
-end
-
 rgb_lin = uint8(255*mat2gray(hdr_global));
 rgb_tonem = tonemap(hdr_global,'NumberOfTiles',[10 10]);  
 
 if(plot)
     figure; 
     imshow(rgb_lin,[]);
-    imwrite(rgb_lin,'results/hdrimpl/global_linear.png');
+    figure;
+    imshow(rgb_tonem,[]);
 end
 
-if(plot)
-    figure; 
-    imshow(rgb_tonem,[]);
+if(glob.writeImgs())
+    imwrite(rgb_lin,'results/hdrimpl/global_linear.png');
     imwrite(rgb_tonem,'results/hdrimpl/global_tonemap.png');
 end
 
@@ -84,9 +82,11 @@ for j = 1:numel(windows)
         figure; 
         subplot(2,1,1);imshow(rgb_lin,[]);
         subplot(2,1,2);imshow(rgb_tonem,[]);
-        imwrite(rgb_lin,strcat('results/hdrimpl/',windowstr,'_linear.png'));
-        imwrite(rgb_tonem,strcat('results/hdrimpl/',windowstr,'_tonemap.png'));
-        imwrite(tonemap(background),strcat('results/hdrimpl/',windowstr,'_background.png'));
+        if(glob.writeImgs())
+            imwrite(rgb_lin,strcat('results/hdrimpl/',windowstr,'_linear.png'));
+            imwrite(rgb_tonem,strcat('results/hdrimpl/',windowstr,'_tonemap.png'));
+            imwrite(tonemap(background),strcat('results/hdrimpl/',windowstr,'_background.png'));
+        end
     end
 end
 
