@@ -1,2 +1,3 @@
 - The HDRtests file can be used to execute the HDR algorithm on a single dataset. 
 - The global_hdr file runs the algorithm on datasets number 4 to 17 and also includes vein extraction.
+- The getWindows file defines the window size used for the moving mean filter in the two files above.
