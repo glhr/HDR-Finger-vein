@@ -1,13 +1,11 @@
 clear all;
 close all;
 dataset = 'dataset16';
-window = [7 7];
-windowstr = '[7 7]';
 
 glob = globals;
 
 plot = true;
-for n = 1:1:15
+for n = 1:1:15 % change based on the number of files in the dataset
     files{n} = glob.getImgPath(dataset,n,'segment');
 end
 
