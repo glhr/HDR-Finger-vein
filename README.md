@@ -1,5 +1,7 @@
 # Implementation of HDR for image acquisition on a finger vein scanner
 
+Assignment description: [High Dynamic Range Finger Vein Acquisition](https://www.utwente.nl/en/eemcs/ds/assignments/running/bachelor/high-dynamic-range-finger-vein-acquisition/)
+
 Bachelor Thesis: [Implementation of HDR for image acquisition on a finger vein scanner. (2018)](https://essay.utwente.nl/75640/)
 
 **Abstract** — A novel approach to finger vein image acquisition
